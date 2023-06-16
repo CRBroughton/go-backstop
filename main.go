@@ -12,17 +12,19 @@ import (
 	"github.com/crbroughton/go-backstop/views/second"
 )
 
+type item struct {
+	title string
+	desc  string
+}
+
+func (i item) Title() string       { return i.title }
+func (i item) Description() string { return i.desc }
+func (i item) FilterValue() string { return i.title }
+
 type model struct {
 	list    list.Model
 	focused iterator.Status
 }
-
-type item struct {
-	title string
-}
-
-func (i item) Title() string       { return i.title }
-func (i item) FilterValue() string { return i.title }
 
 func (m model) Init() tea.Cmd {
 	return nil
@@ -39,7 +41,7 @@ func (model *model) Next() {
 
 func items() []list.Item {
 	return []list.Item{
-		item{title: "test"},
+		item{title: "test", desc: "desc"},
 	}
 }
 
@@ -52,8 +54,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			return m, tea.Quit
 		}
+	case tea.WindowSizeMsg:
+		h, v := styles.DocStyle.GetFrameSize()
+		m.list.SetSize(msg.Width-h, msg.Height-v)
 	}
-	return m, nil
+	var cmd tea.Cmd
+	m.list, cmd = m.list.Update(msg)
+	return m, cmd
 }
 
 func (m model) View() string {
@@ -72,11 +79,19 @@ func (m model) View() string {
 func main() {
 	items := items()
 	delegate := list.NewDefaultDelegate()
+
+	delegate.Styles.SelectedTitle = styles.SelectedItem
+	delegate.Styles.SelectedDesc = delegate.Styles.SelectedTitle.Copy()
+
 	m := model{list: list.New(items, delegate, 0, 0)}
 
-	p := tea.NewProgram(m)
-	if _, err := p.Run(); err != nil {
-		fmt.Printf("Error %v", err)
+	m.list.Styles.Title = styles.TitleStyle
+	m.list.Title = "Go, Backstop!"
+
+	program := tea.NewProgram(m, tea.WithAltScreen())
+
+	if _, err := program.Run(); err != nil {
+		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}
 }
