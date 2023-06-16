@@ -8,13 +8,15 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/crbroughton/go-backstop/iterator"
 	"github.com/crbroughton/go-backstop/styles"
+	"github.com/crbroughton/go-backstop/utils"
 	master "github.com/crbroughton/go-backstop/views/first"
 	"github.com/crbroughton/go-backstop/views/second"
 )
 
 type item struct {
-	title string
-	desc  string
+	title   string
+	desc    string
+	command string
 }
 
 func (i item) Title() string       { return i.title }
@@ -24,6 +26,7 @@ func (i item) FilterValue() string { return i.title }
 type model struct {
 	list    list.Model
 	focused iterator.Status
+	loading bool
 }
 
 func (m model) Init() tea.Cmd {
@@ -41,7 +44,9 @@ func (model *model) Next() {
 
 func items() []list.Item {
 	return []list.Item{
-		item{title: "test", desc: "desc"},
+		item{title: "Run tests", desc: "Runs all stored tests", command: ""},
+		item{title: "Create new test", desc: "Create a new test for your site"},
+		item{title: "Change user settings", desc: "Update your personal settings"},
 	}
 }
 
@@ -50,7 +55,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "enter", " ":
-			m.Next()
+			i, ok := m.list.SelectedItem().(item)
+			if ok {
+				response := utils.RunCommand(i.command, &m.loading)
+				m.loading = response
+			}
 		case "ctrl+c", "q":
 			return m, tea.Quit
 		}
