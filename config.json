@@ -1,0 +1,14 @@
+{
+ "Viewports": [
+  {
+   "Name": "desktop",
+   "Width": 1280,
+   "Height": 720
+  },
+  {
+   "Name": "iPhone 12/13 Pro",
+   "Width": 390,
+   "Height": 844
+  }
+ ]
+}
