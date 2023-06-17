@@ -3,11 +3,13 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/crbroughton/go-backstop/iterator"
 	"github.com/crbroughton/go-backstop/styles"
+	"github.com/crbroughton/go-backstop/utils"
 	master "github.com/crbroughton/go-backstop/views/first"
 	"github.com/crbroughton/go-backstop/views/second"
 	"github.com/crbroughton/go-backstop/views/settings"
@@ -31,6 +33,12 @@ type model struct {
 }
 
 func (m model) Init() tea.Cmd {
+	_, err := exec.LookPath("docker")
+
+	if utils.IsError(err) {
+		fmt.Println("Could not find docker; Please install docker")
+		os.Exit(1)
+	}
 	return nil
 }
 
