@@ -2,51 +2,22 @@ package settings
 
 import (
 	"github.com/charmbracelet/bubbles/list"
-	tea "github.com/charmbracelet/bubbletea"
+	"github.com/crbroughton/go-backstop/iterator"
 )
 
-type SettingsPageItem struct {
+type Task struct {
 	title string
+	desc  string
+	ID    iterator.Page
 }
 
-func (i SettingsPageItem) Title() string       { return i.title }
-func (i SettingsPageItem) FilterValue() string { return i.title }
-
-type SettingsPage struct {
-	List  list.Model
-	title string
-}
-
-func (m SettingsPage) Init() tea.Cmd {
-	return nil
-}
-
-func (m SettingsPage) View() string {
-	return "user settings"
-}
-
-func (m SettingsPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "q":
-			return m, tea.Quit
-		}
-	}
-	return m, nil
-}
+func (i Task) Title() string       { return i.title }
+func (i Task) Description() string { return i.desc }
+func (i Task) FilterValue() string { return i.title }
 
 func Content() []list.Item {
 	return []list.Item{
-		SettingsPageItem{title: "Create user cookie"},
+		Task{title: "Create user cookie", desc: "test"},
+		Task{title: "Create user cookie", desc: "test"},
 	}
-}
-
-var content = Content()
-
-var delegate = list.NewDefaultDelegate()
-
-var Modal = SettingsPage{
-	List:  list.New(content, delegate, 0, 0),
-	title: "SettingsPage",
 }

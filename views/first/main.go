@@ -2,58 +2,22 @@ package first
 
 import (
 	"github.com/charmbracelet/bubbles/list"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/crbroughton/go-backstop/styles"
+	"github.com/crbroughton/go-backstop/iterator"
 )
 
-func (m MainPage) Init() tea.Cmd {
-	return nil
-}
-
-type MainPageItem struct {
+type item struct {
 	title string
+	desc  string
+	ID    iterator.Page
 }
 
-func (i MainPageItem) Title() string       { return i.title }
-func (i MainPageItem) FilterValue() string { return i.title }
-
-type MainPage struct {
-	List  list.Model
-	title string
-}
-
-func (m MainPage) View() string {
-	return styles.AppStyle.Render(m.List.View())
-}
-
-func (m MainPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "enter", " ":
-		case "ctrl+c", "q":
-			return m, tea.Quit
-		}
-	}
-	return m, nil
-}
+func (i item) Title() string       { return i.title }
+func (i item) Description() string { return i.desc }
+func (i item) FilterValue() string { return i.title }
 
 func Content() []list.Item {
 	return []list.Item{
-		MainPageItem{
-			title: "test",
-		},
-		MainPageItem{
-			title: "test2",
-		},
+		item{title: "Go to settings", desc: "This will take you to the settings", ID: iterator.SettingsPage},
+		item{title: "Go to settings", desc: "This will take you to the settings", ID: iterator.SettingsPage},
 	}
-}
-
-var content = Content()
-
-var delegate = list.NewDefaultDelegate()
-
-var Modal = MainPage{
-	List:  list.New(content, delegate, 0, 0),
-	title: "masterPage",
 }

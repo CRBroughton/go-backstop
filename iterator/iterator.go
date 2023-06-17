@@ -3,8 +3,6 @@ package iterator
 type Page int
 
 const (
-	Root Page = iota
-	MainPage
-	SecondPage
+	MainPage Page = iota
 	SettingsPage
 )

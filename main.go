@@ -3,113 +3,138 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/crbroughton/go-backstop/iterator"
 	"github.com/crbroughton/go-backstop/styles"
 	"github.com/crbroughton/go-backstop/utils"
-	master "github.com/crbroughton/go-backstop/views/first"
-	"github.com/crbroughton/go-backstop/views/second"
 	"github.com/crbroughton/go-backstop/views/settings"
 )
 
+const divisor = 4
+
 type item struct {
-	title   string
-	desc    string
-	command string
-	ID      iterator.Page
+	title string
+	desc  string
+	ID    iterator.Page
 }
 
 func (i item) Title() string       { return i.title }
 func (i item) Description() string { return i.desc }
 func (i item) FilterValue() string { return i.title }
 
-type model struct {
-	list    list.Model
+type Model struct {
 	focused iterator.Page
-	loading bool
+	lists   []list.Model
+	loaded  bool
 }
 
-func (m model) Init() tea.Cmd {
-	_, err := exec.LookPath("docker")
-
-	if utils.IsError(err) {
-		fmt.Println("Could not find docker; Please install docker")
-		os.Exit(1)
-	}
-	return nil
+func New() *Model {
+	return &Model{}
 }
 
-func (m *model) setView(id iterator.Page) {
-	switch id {
-	case iterator.SettingsPage:
-		m.focused = iterator.SettingsPage
-
-	}
-}
-
-func items() []list.Item {
+func Content() []list.Item {
 	return []list.Item{
-		item{title: "Run tests", desc: "Runs all stored tests", command: ""},
+		item{title: "Run tests", desc: "Runs all stored tests"},
 		item{title: "Create new test", desc: "Create a new test for your site"},
 		item{title: "Settings Page", desc: "Update your personal settings", ID: iterator.SettingsPage},
 	}
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "enter", " ":
-			i, ok := m.list.SelectedItem().(item)
-			if ok {
-				m.setView(i.ID)
-			}
-		case "ctrl+c", "q":
-			return m, tea.Quit
-		}
-	case tea.WindowSizeMsg:
-		h, v := styles.DocStyle.GetFrameSize()
-		m.list.SetSize(msg.Width-h, msg.Height-v)
+func (model *Model) initLists(width, height int) {
+	defaultList := list.New(
+		[]list.Item{},
+		list.NewDefaultDelegate(),
+		width/divisor, // this probably needs fixing
+		height/2,
+	)
+	defaultList.SetShowHelp(false) // without this, the page borks
+
+	model.lists = []list.Model{
+		defaultList,
+		defaultList,
 	}
-	var cmd tea.Cmd
-	m.list, cmd = m.list.Update(msg)
-	return m, cmd
+
+	model.lists[iterator.MainPage].Title = "Go, Backstop!"
+	model.lists[iterator.SettingsPage].Title = "Settings"
+
+	model.lists[iterator.MainPage].SetItems(Content())
+	model.lists[iterator.SettingsPage].SetItems(settings.Content())
+
 }
 
-func (m model) View() string {
-	switch m.focused {
-	case iterator.Root:
-		return styles.AppStyle.Render(m.list.View())
+func (model Model) Init() tea.Cmd {
+	return nil
+}
+
+func (model *Model) setView(id iterator.Page) {
+	switch id {
 	case iterator.MainPage:
-		return master.Modal.View()
-	case iterator.SecondPage:
-		return second.Modal.View()
+		model.focused = iterator.MainPage
 	case iterator.SettingsPage:
-		return settings.Modal.View()
-	default:
-		return "unknown state"
+		model.focused = iterator.SettingsPage
 	}
+}
+
+func (model Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+
+	case tea.WindowSizeMsg:
+		if !model.loaded {
+			styles.AppStyle.Width(msg.Width / divisor) // again, fix this
+			styles.AppStyle.Height(msg.Height - divisor)
+			model.initLists(msg.Width, msg.Height)
+			model.loaded = true
+		}
+		h, v := styles.AppStyle.GetFrameSize()
+		model.lists[model.focused].SetSize(msg.Width-h, msg.Height-v)
+
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "enter":
+			item, ok := model.lists[model.focused].SelectedItem().(item)
+			if !ok {
+				model.focused = 0
+			}
+			if ok {
+				model.setView(item.ID)
+			}
+		}
+	}
+
+	var cmd tea.Cmd
+	model.lists[model.focused], cmd = model.lists[model.focused].Update(msg)
+	return model, cmd
+}
+
+func (model Model) View() string {
+	if model.loaded {
+		mainView := model.lists[iterator.MainPage].View()
+		settingsView := model.lists[iterator.SettingsPage].View()
+
+		switch model.focused {
+		case iterator.MainPage:
+			return styles.AppStyle.Render(mainView)
+		case iterator.SettingsPage:
+			return styles.AppStyle.Render(settingsView)
+		default:
+			return styles.AppStyle.Render(mainView)
+		}
+	} else {
+		return "loading..."
+	}
+
 }
 
 func main() {
-	items := items()
-	delegate := list.NewDefaultDelegate()
+	model := New()
+	program := tea.NewProgram(model, tea.WithAltScreen())
 
-	delegate.Styles.SelectedTitle = styles.SelectedItem
-	delegate.Styles.SelectedDesc = delegate.Styles.SelectedTitle.Copy()
+	_, err := program.Run()
 
-	m := model{list: list.New(items, delegate, 0, 0)}
-
-	m.list.Styles.Title = styles.TitleStyle
-	m.list.Title = "Go, Backstop!"
-
-	program := tea.NewProgram(m, tea.WithAltScreen())
-
-	if _, err := program.Run(); err != nil {
-		fmt.Println("Error running program:", err)
+	if utils.IsError(err) {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 }
