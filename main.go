@@ -36,8 +36,8 @@ func New() *Model {
 
 func Content() []list.Item {
 	return []list.Item{
-		item{title: "Run tests", desc: "Runs all stored tests"},
-		item{title: "Create new test", desc: "Create a new test for your site"},
+		item{title: "Run tests", desc: "Runs all stored tests "},
+		item{title: "Create new test", desc: "Create a new test"},
 		item{title: "Settings Page", desc: "Update your personal settings", ID: iterator.SettingsPage},
 	}
 }
@@ -82,8 +82,6 @@ func (model Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.WindowSizeMsg:
 		if !model.loaded {
-			styles.AppStyle.Width(msg.Width / divisor) // again, fix this
-			styles.AppStyle.Height(msg.Height - divisor)
 			model.initLists(msg.Width, msg.Height)
 			model.loaded = true
 		}
