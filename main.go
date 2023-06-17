@@ -43,9 +43,14 @@ func Content() []list.Item {
 }
 
 func (model *Model) initLists(width, height int) {
+	delegate := list.NewDefaultDelegate()
+
+	delegate.Styles.SelectedTitle = styles.SelectedItem
+	delegate.Styles.SelectedDesc = delegate.Styles.SelectedTitle.Copy()
+
 	defaultList := list.New(
 		[]list.Item{},
-		list.NewDefaultDelegate(),
+		delegate,
 		width/divisor, // this probably needs fixing
 		height/2,
 	)
@@ -59,8 +64,13 @@ func (model *Model) initLists(width, height int) {
 	model.lists[iterator.MainPage].Title = "Go, Backstop!"
 	model.lists[iterator.SettingsPage].Title = "Settings"
 
+	model.lists[iterator.MainPage].Styles.Title = styles.TitleStyle
+	model.lists[iterator.SettingsPage].Styles.Title = styles.TitleStyle
+
 	model.lists[iterator.MainPage].SetItems(Content())
 	model.lists[iterator.SettingsPage].SetItems(settings.Content())
+
+	model.lists[iterator.SettingsPage].SetSize(200, 20)
 
 }
 
