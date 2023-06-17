@@ -14,8 +14,14 @@ type Viewport struct {
 	Height int
 }
 
+type Scenario struct {
+	Label string
+	Url   string
+}
+
 type Config struct {
 	Viewports []Viewport
+	Scenarios []Scenario
 }
 
 var path = "config.json"
@@ -34,6 +40,7 @@ func defaultViewports() Config {
 				Height: 844,
 			},
 		},
+		Scenarios: []Scenario{},
 	}
 	return config
 }
