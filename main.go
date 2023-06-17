@@ -8,15 +8,16 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/crbroughton/go-backstop/iterator"
 	"github.com/crbroughton/go-backstop/styles"
-	"github.com/crbroughton/go-backstop/utils"
 	master "github.com/crbroughton/go-backstop/views/first"
 	"github.com/crbroughton/go-backstop/views/second"
+	"github.com/crbroughton/go-backstop/views/settings"
 )
 
 type item struct {
 	title   string
 	desc    string
 	command string
+	ID      iterator.Page
 }
 
 func (i item) Title() string       { return i.title }
@@ -25,7 +26,7 @@ func (i item) FilterValue() string { return i.title }
 
 type model struct {
 	list    list.Model
-	focused iterator.Status
+	focused iterator.Page
 	loading bool
 }
 
@@ -33,12 +34,11 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
-func (model *model) Next() {
-	if model.focused < 1 {
-		model.focused++
-		second.Content()
-	} else {
-		model.focused = 0
+func (m *model) setView(id iterator.Page) {
+	switch id {
+	case iterator.SettingsPage:
+		m.focused = iterator.SettingsPage
+
 	}
 }
 
@@ -46,7 +46,7 @@ func items() []list.Item {
 	return []list.Item{
 		item{title: "Run tests", desc: "Runs all stored tests", command: ""},
 		item{title: "Create new test", desc: "Create a new test for your site"},
-		item{title: "Change user settings", desc: "Update your personal settings"},
+		item{title: "Settings Page", desc: "Update your personal settings", ID: iterator.SettingsPage},
 	}
 }
 
@@ -57,8 +57,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter", " ":
 			i, ok := m.list.SelectedItem().(item)
 			if ok {
-				response := utils.RunCommand(i.command, &m.loading)
-				m.loading = response
+				m.setView(i.ID)
 			}
 		case "ctrl+c", "q":
 			return m, tea.Quit
@@ -80,6 +79,8 @@ func (m model) View() string {
 		return master.Modal.View()
 	case iterator.SecondPage:
 		return second.Modal.View()
+	case iterator.SettingsPage:
+		return settings.Modal.View()
 	default:
 		return "unknown state"
 	}

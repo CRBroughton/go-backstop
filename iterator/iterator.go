@@ -1,9 +1,10 @@
 package iterator
 
-type Status int
+type Page int
 
 const (
-	Root Status = iota
+	Root Page = iota
 	MainPage
 	SecondPage
+	SettingsPage
 )
