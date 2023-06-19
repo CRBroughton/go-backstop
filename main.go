@@ -69,6 +69,8 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.windowSize = msg // pass this along to the entry view so it uses the full window size when it's initialized
 	case mainmenu.SettingsSelected:
 		m.state = settingsMenu
+	case settings.GoBackToMainMenu:
+		m.state = mainMenu
 	}
 
 	switch m.state {

@@ -6,7 +6,6 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/crbroughton/go-backstop/styles"
-	"github.com/crbroughton/go-backstop/views/mainMenu/settings"
 )
 
 type Model struct {
@@ -89,12 +88,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	switch m.selected {
-	case settingsPage:
-		return styles.AppStyle.Render(settings.SettingsModel.View())
-	default:
-		return styles.AppStyle.Render(m.list.View())
-	}
+	return styles.AppStyle.Render(m.list.View())
 }
 
 func Content() []list.Item {
