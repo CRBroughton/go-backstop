@@ -63,8 +63,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			if ok {
 				m.setView(item.ID)
-				return m, func() tea.Msg {
-					return GoBackToMainMenu(true)
+				switch m.selected {
+				case mainMenu:
+					return m, func() tea.Msg {
+						return GoBackToMainMenu(true)
+					}
 				}
 			}
 		}
