@@ -69,9 +69,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			if ok {
 				m.setView(item.ID)
-				return m, func() tea.Msg {
-					return SettingsSelected(true)
+				switch m.selected {
+				case settingsPage:
+					return m, func() tea.Msg {
+						return SettingsSelected(true)
+					}
 				}
+
 			}
 		}
 		switch {
