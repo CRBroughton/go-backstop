@@ -8,20 +8,21 @@ import (
 	"github.com/crbroughton/go-backstop/styles"
 )
 
+type (
+	menuItem         int
+	SettingsSelected bool
+)
+
 type Model struct {
 	list     list.Model
 	selected menuItem
 }
-
-type menuItem int
 
 const (
 	runTests menuItem = iota
 	createNewTest
 	settingsPage
 )
-
-type SettingsSelected bool
 
 type item struct {
 	title string
@@ -79,8 +80,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		switch {
-		// case key.Matches(msg, constants.Keymap.Enter):
-		// 	cmd = selectProjectCmd(m.getSelectedMenuItem())
 		default:
 			m.list, cmd = m.list.Update(msg)
 		}
@@ -106,15 +105,3 @@ func Content() []list.Item {
 func (model *Model) setView(id menuItem) {
 	model.selected = id
 }
-
-// func (m Model) getSelectedMenuItem() int {
-// 	menuItems := m.list.Items()
-// 	activeItem := menuItems[m.list.Index()]
-// 	return activeItem.(item).ID
-// }
-
-// func selectProjectCmd(ActiveProjectID int) tea.Cmd {
-// 	return func() tea.Msg {
-// 		return SelectMsg{ActiveProjectID: ActiveProjectID}
-// 	}
-// }

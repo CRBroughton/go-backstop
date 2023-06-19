@@ -8,13 +8,15 @@ import (
 	"github.com/crbroughton/go-backstop/styles"
 )
 
+type (
+	menuItem         int
+	GoBackToMainMenu bool
+)
+
 type Model struct {
 	list     list.Model
 	selected menuItem
 }
-
-type menuItem int
-type GoBackToMainMenu bool
 
 const (
 	first menuItem = iota
