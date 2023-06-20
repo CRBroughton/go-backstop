@@ -5,9 +5,11 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/crbroughton/go-backstop/config"
 	"github.com/crbroughton/go-backstop/utils"
+	depchecker "github.com/crbroughton/go-backstop/views"
 	mainmenu "github.com/crbroughton/go-backstop/views/mainMenu"
 	"github.com/crbroughton/go-backstop/views/mainMenu/settings"
 )
@@ -15,12 +17,14 @@ import (
 type sessionState int
 
 const (
-	mainMenu sessionState = iota
+	depChecker sessionState = iota
+	mainMenu
 	settingsMenu
 )
 
 type MainModel struct {
 	state        sessionState
+	depChecker   tea.Model
 	mainMenu     tea.Model
 	settingsMenu tea.Model
 	windowSize   tea.WindowSizeMsg
@@ -40,7 +44,8 @@ func main() {
 
 func New() MainModel {
 	return MainModel{
-		state:        mainMenu,
+		state:        depChecker,
+		depChecker:   depchecker.New(),
 		mainMenu:     mainmenu.New(),
 		settingsMenu: settings.SettingsModel,
 	}
@@ -57,7 +62,7 @@ func (m MainModel) Init() tea.Cmd {
 	config.CreateJSON()
 	config.WriteDefaultConfiguration()
 
-	return nil
+	return tea.Batch(m.depChecker.Init())
 }
 
 func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -71,9 +76,15 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.state = settingsMenu
 	case settings.GoBackToMainMenu:
 		m.state = mainMenu
+	case spinner.TickMsg:
+		m.depChecker, cmd = m.depChecker.Update(msg)
+		cmds = append(cmds, cmd)
 	}
 
 	switch m.state {
+	case depChecker:
+		m.depChecker, cmd = m.depChecker.Update(msg)
+		cmds = append(cmds, cmd)
 	case mainMenu:
 		newMainMenu, newCmd := m.mainMenu.Update(msg)
 		mainMenuModel, ok := newMainMenu.(mainmenu.Model)
@@ -105,6 +116,6 @@ func (m MainModel) View() string {
 	case settingsMenu:
 		return m.settingsMenu.View()
 	default:
-		return m.mainMenu.View()
+		return m.depChecker.View()
 	}
 }
