@@ -12,6 +12,7 @@ import (
 	depchecker "github.com/crbroughton/go-backstop/views"
 	mainmenu "github.com/crbroughton/go-backstop/views/mainMenu"
 	"github.com/crbroughton/go-backstop/views/mainMenu/settings"
+	"github.com/crbroughton/go-backstop/views/mainMenu/settings/viewport"
 )
 
 type sessionState int
@@ -20,6 +21,7 @@ const (
 	depChecker sessionState = iota
 	mainMenu
 	settingsMenu
+	viewportMenu
 )
 
 type MainModel struct {
@@ -27,6 +29,7 @@ type MainModel struct {
 	depChecker   tea.Model
 	mainMenu     tea.Model
 	settingsMenu tea.Model
+	viewportMenu tea.Model
 	windowSize   tea.WindowSizeMsg
 }
 
@@ -44,10 +47,11 @@ func main() {
 
 func New() MainModel {
 	return MainModel{
-		state:        depChecker,
+		state:        mainMenu,
 		depChecker:   depchecker.New(),
 		mainMenu:     mainmenu.New(),
 		settingsMenu: settings.SettingsModel,
+		viewportMenu: viewport.New(),
 	}
 }
 
@@ -76,6 +80,10 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.state = settingsMenu
 	case settings.GoBackToMainMenu:
 		m.state = mainMenu
+	case settings.GoToViewPort:
+		m.state = viewportMenu
+	case viewport.GoBackToSettingsMenu:
+		m.state = settingsMenu
 	case spinner.TickMsg:
 		m.depChecker, cmd = m.depChecker.Update(msg)
 		cmds = append(cmds, cmd)
@@ -103,6 +111,15 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.settingsMenu = settingsMenumodel
 		cmd = newCmd
+	case viewportMenu:
+		newViewportMenu, newCmd := m.viewportMenu.Update(msg)
+		viewportMenuModel, ok := newViewportMenu.(viewport.Model)
+
+		if !ok {
+			panic("could not perform assertion on viewportmenu model")
+		}
+		m.viewportMenu = viewportMenuModel
+		cmd = newCmd
 	}
 
 	cmds = append(cmds, cmd)
@@ -115,6 +132,8 @@ func (m MainModel) View() string {
 		return m.mainMenu.View()
 	case settingsMenu:
 		return m.settingsMenu.View()
+	case viewportMenu:
+		return m.viewportMenu.View()
 	default:
 		return m.depChecker.View()
 	}

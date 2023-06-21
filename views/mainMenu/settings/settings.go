@@ -11,6 +11,7 @@ import (
 type (
 	menuItem         int
 	GoBackToMainMenu bool
+	GoToViewPort     bool
 )
 
 type Model struct {
@@ -20,7 +21,8 @@ type Model struct {
 
 const (
 	first menuItem = iota
-	second
+	createCookie
+	viewPort
 	mainMenu
 )
 
@@ -70,6 +72,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, func() tea.Msg {
 						return GoBackToMainMenu(true)
 					}
+				case viewPort:
+					return m, func() tea.Msg {
+						return GoToViewPort(true)
+					}
 				}
 			}
 		}
@@ -89,8 +95,8 @@ func (m Model) View() string {
 }
 func Content() []list.Item {
 	return []list.Item{
-		item{title: "Create user cookie", desc: "test"},
-		item{title: "Create user cookie", desc: "test"},
+		item{title: "Create user cookie", desc: "Create new cookie", ID: createCookie},
+		item{title: "Add a viewport", desc: "New viewport", ID: viewPort},
 		item{title: "Go back to main menu", ID: mainMenu},
 	}
 }
