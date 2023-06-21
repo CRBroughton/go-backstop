@@ -2,6 +2,8 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 
@@ -54,6 +56,9 @@ func CreateJSON() {
 		if utils.IsError(err) {
 			return
 		}
+
+		WriteDefaultConfiguration()
+
 		defer file.Close()
 	}
 }
@@ -71,5 +76,39 @@ func WriteDefaultConfiguration() {
 
 	if utils.IsError(err) {
 		log.Fatal("Failed to write default configuration to the JSON file")
+	}
+}
+
+func AppendToViewportArray(newViewport Viewport) {
+	// Read JSON file
+	file, err := ioutil.ReadFile(path)
+	if utils.IsError(err) {
+		fmt.Println("Error reading file:", err)
+		return
+	}
+
+	// Unmarshal JSON
+	var config Config
+	err = json.Unmarshal(file, &config)
+	if utils.IsError(err) {
+		fmt.Println("Error unmarshaling JSON:", err)
+		return
+	}
+
+	// Append the new Viewport to the Viewports array
+	config.Viewports = append(config.Viewports, newViewport)
+
+	// Marshal the updated Config struct back to JSON
+	updatedJSON, err := json.MarshalIndent(config, "", "  ")
+	if utils.IsError(err) {
+		fmt.Println("Error marshaling JSON:", err)
+		return
+	}
+
+	// Write the updated JSON to a file
+	err = ioutil.WriteFile(path, updatedJSON, 0644)
+	if utils.IsError(err) {
+		fmt.Println("Error writing file:", err)
+		return
 	}
 }

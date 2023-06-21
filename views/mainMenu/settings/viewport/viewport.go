@@ -5,11 +5,15 @@ package viewport
 
 import (
 	"fmt"
+	"log"
+	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/crbroughton/go-backstop/config"
+	"github.com/crbroughton/go-backstop/utils"
 )
 
 var (
@@ -82,7 +86,29 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Did the user press enter while the submit button was focused?
 			// If so, exit.
 			if s == "enter" && m.focusIndex == len(m.inputs) {
-				return m, tea.Quit
+				width, err := strconv.Atoi(m.inputs[1].Value())
+
+				if utils.IsError(err) {
+					log.Fatal("Couldn't convert the width you entered")
+				}
+
+				height, err := strconv.Atoi(m.inputs[2].Value())
+
+				if utils.IsError(err) {
+					log.Fatal("Couldn't convert the height you entered")
+				}
+
+				config.AppendToViewportArray(config.Viewport{
+					Name:   m.inputs[0].Value(),
+					Width:  width,
+					Height: height,
+				})
+
+				m = New()
+
+				return m, func() tea.Msg {
+					return GoBackToSettingsMenu(true)
+				}
 			}
 
 			// Cycle indexes

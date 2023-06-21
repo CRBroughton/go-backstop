@@ -49,7 +49,6 @@ func (m *Model) checkDocker() {
 	}
 
 	config.CreateJSON()
-	config.WriteDefaultConfiguration()
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
