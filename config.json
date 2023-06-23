@@ -1,15 +1,15 @@
 {
- "Viewports": [
+ "viewports": [
   {
-   "Name": "desktop",
-   "Width": 1280,
-   "Height": 720
+   "name": "desktop",
+   "width": 1280,
+   "height": 720
   },
   {
-   "Name": "iPhone 12/13 Pro",
-   "Width": 390,
-   "Height": 844
+   "name": "iPhone 12/13 Pro",
+   "width": 390,
+   "height": 844
   }
  ],
- "Scenarios": []
+ "scenarios": []
 }

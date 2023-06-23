@@ -11,9 +11,9 @@ import (
 )
 
 type Viewport struct {
-	Name   string
-	Width  int
-	Height int
+	Name   string `json:"name"`
+	Width  int    `json:"width"`
+	Height int    `json:"height"`
 }
 
 type Scenario struct {
@@ -22,8 +22,8 @@ type Scenario struct {
 }
 
 type Config struct {
-	Viewports []Viewport
-	Scenarios []Scenario
+	Viewports []Viewport `json:"viewports"`
+	Scenarios []Scenario `json:"scenarios"`
 }
 
 var path = "config.json"
