@@ -73,6 +73,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "esc":
+			m = New()
 			return m, func() tea.Msg {
 				return GoBackToSettingsMenu(true)
 			}
