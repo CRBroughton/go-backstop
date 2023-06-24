@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -17,8 +18,9 @@ type Viewport struct {
 }
 
 type Scenario struct {
-	Label string
-	Url   string
+	Label      string `json:"label"`
+	Url        string `json:"url"`
+	Cookiepath Cookie
 }
 
 type Cookie struct {
@@ -33,7 +35,8 @@ type Config struct {
 	Cookies   []Cookie   `json:"cookies"`
 }
 
-var path = "config.json"
+const settingsFolder = ".settings"
+const settingsPath = ".settings/config.json"
 
 func defaultViewports() Config {
 	config := Config{
@@ -55,11 +58,25 @@ func defaultViewports() Config {
 	return config
 }
 
+func createSettingsFolder() {
+	var _, err = os.Stat(settingsFolder)
+
+	if errors.Is(err, os.ErrNotExist) {
+		err := os.Mkdir(settingsFolder, os.ModePerm)
+
+		if utils.IsError(err) {
+			log.Fatal("Failed to make settings folder")
+		}
+	}
+}
+
 func CreateJSON() {
-	var _, err = os.Stat(path)
+	createSettingsFolder()
+
+	var _, err = os.Stat(settingsPath)
 
 	if os.IsNotExist(err) {
-		var file, err = os.Create(path)
+		var file, err = os.Create(settingsPath)
 
 		if utils.IsError(err) {
 			return
@@ -80,7 +97,7 @@ func WriteDefaultConfiguration() {
 		log.Fatal("Failed to create default JSON configuration file")
 	}
 
-	err = os.WriteFile(path, JSON, 0644)
+	err = os.WriteFile(settingsPath, JSON, 0644)
 
 	if utils.IsError(err) {
 		log.Fatal("Failed to write default configuration to the JSON file")
@@ -90,7 +107,7 @@ func WriteDefaultConfiguration() {
 // AppendToJSONArray appends a new struct to the configuration file
 func AppendToJSONArray(newItem interface{}, fieldName string) {
 	// Read JSON file
-	file, err := ioutil.ReadFile(path)
+	file, err := ioutil.ReadFile(settingsPath)
 	if utils.IsError(err) {
 		fmt.Println("Error reading file:", err)
 		return
@@ -119,7 +136,7 @@ func AppendToJSONArray(newItem interface{}, fieldName string) {
 	}
 
 	// Write the updated JSON to a file
-	err = ioutil.WriteFile(path, updatedJSON, 0644)
+	err = ioutil.WriteFile(settingsPath, updatedJSON, 0644)
 	if utils.IsError(err) {
 		fmt.Println("Error writing file:", err)
 		return
