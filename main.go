@@ -53,7 +53,7 @@ func New() MainModel {
 		state:        mainMenu,
 		depChecker:   depchecker.New(),
 		mainMenu:     mainmenu.New(),
-		settingsMenu: settings.SettingsModel,
+		settingsMenu: settings.New(),
 		cookieMenu:   cookies.New(),
 		viewportMenu: viewport.New(),
 	}

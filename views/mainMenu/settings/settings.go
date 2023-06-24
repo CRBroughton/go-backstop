@@ -37,14 +37,19 @@ func (i item) Title() string       { return i.title }
 func (i item) Description() string { return i.desc }
 func (i item) FilterValue() string { return i.title }
 
-var delegate = list.NewDefaultDelegate()
+func New() tea.Model {
+	delegate := list.NewDefaultDelegate()
 
-var SettingsModel = Model{list: list.New(
-	Content(),
-	delegate,
-	50,
-	20,
-)}
+	model := Model{list: list.New(
+		Content(),
+		delegate,
+		50,
+		20,
+	)}
+
+	model.list.Title = "Settings menu"
+	return model
+}
 
 func (m Model) Init() tea.Cmd {
 	return nil
