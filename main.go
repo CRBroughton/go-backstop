@@ -12,6 +12,7 @@ import (
 	depchecker "github.com/crbroughton/go-backstop/views"
 	mainmenu "github.com/crbroughton/go-backstop/views/mainMenu"
 	"github.com/crbroughton/go-backstop/views/mainMenu/settings"
+	"github.com/crbroughton/go-backstop/views/mainMenu/settings/cookies"
 	"github.com/crbroughton/go-backstop/views/mainMenu/settings/viewport"
 )
 
@@ -21,6 +22,7 @@ const (
 	depChecker sessionState = iota
 	mainMenu
 	settingsMenu
+	cookieMenu
 	viewportMenu
 )
 
@@ -29,6 +31,7 @@ type MainModel struct {
 	depChecker   tea.Model
 	mainMenu     tea.Model
 	settingsMenu tea.Model
+	cookieMenu   tea.Model
 	viewportMenu tea.Model
 	windowSize   tea.WindowSizeMsg
 }
@@ -51,6 +54,7 @@ func New() MainModel {
 		depChecker:   depchecker.New(),
 		mainMenu:     mainmenu.New(),
 		settingsMenu: settings.SettingsModel,
+		cookieMenu:   cookies.New(),
 		viewportMenu: viewport.New(),
 	}
 }
@@ -81,7 +85,11 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.state = mainMenu
 	case settings.GoToViewPort:
 		m.state = viewportMenu
+	case settings.GoToCookie:
+		m.state = cookieMenu
 	case viewport.GoBackToSettingsMenu:
+		m.state = settingsMenu
+	case cookies.GoBackToSettingsMenu:
 		m.state = settingsMenu
 	case spinner.TickMsg:
 		m.depChecker, cmd = m.depChecker.Update(msg)
@@ -110,6 +118,15 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.settingsMenu = settingsMenumodel
 		cmd = newCmd
+	case cookieMenu:
+		newCookieMenu, newCmd := m.cookieMenu.Update(msg)
+		cookieMenuModel, ok := newCookieMenu.(cookies.Model)
+
+		if !ok {
+			panic("could not perform assertion on cookiemenu model")
+		}
+		m.cookieMenu = cookieMenuModel
+		cmd = newCmd
 	case viewportMenu:
 		newViewportMenu, newCmd := m.viewportMenu.Update(msg)
 		viewportMenuModel, ok := newViewportMenu.(viewport.Model)
@@ -131,6 +148,8 @@ func (m MainModel) View() string {
 		return m.mainMenu.View()
 	case settingsMenu:
 		return m.settingsMenu.View()
+	case cookieMenu:
+		return m.cookieMenu.View()
 	case viewportMenu:
 		return m.viewportMenu.View()
 	default:

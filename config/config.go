@@ -21,9 +21,16 @@ type Scenario struct {
 	Url   string
 }
 
+type Cookie struct {
+	Domain string `json:"domain"`
+	Name   string `json:"name"`
+	Value  string `json:"value"`
+}
+
 type Config struct {
 	Viewports []Viewport `json:"viewports"`
 	Scenarios []Scenario `json:"scenarios"`
+	Cookies   []Cookie   `json:"cookies"`
 }
 
 var path = "config.json"
@@ -43,6 +50,7 @@ func defaultViewports() Config {
 			},
 		},
 		Scenarios: []Scenario{},
+		Cookies:   []Cookie{},
 	}
 	return config
 }
