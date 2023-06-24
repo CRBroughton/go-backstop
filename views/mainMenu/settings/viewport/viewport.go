@@ -99,11 +99,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					log.Fatal("Couldn't convert the height you entered")
 				}
 
-				config.AppendToViewportArray(config.Viewport{
+				config.AppendToJSONArray(config.Viewport{
 					Name:   m.inputs[0].Value(),
 					Width:  width,
 					Height: height,
-				})
+				}, "viewports")
 
 				m = New()
 

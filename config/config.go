@@ -79,7 +79,8 @@ func WriteDefaultConfiguration() {
 	}
 }
 
-func AppendToViewportArray(newViewport Viewport) {
+// AppendToJSONArray appends a new struct to the configuration file
+func AppendToJSONArray(newItem interface{}, fieldName string) {
 	// Read JSON file
 	file, err := ioutil.ReadFile(path)
 	if utils.IsError(err) {
@@ -88,18 +89,22 @@ func AppendToViewportArray(newViewport Viewport) {
 	}
 
 	// Unmarshal JSON
-	var config Config
-	err = json.Unmarshal(file, &config)
-	if utils.IsError(err) {
-		fmt.Println("Error unmarshaling JSON:", err)
+	var data map[string]interface{}
+	if err := json.Unmarshal(file, &data); err != nil {
+		fmt.Println("Error marshaling JSON:", err)
 		return
 	}
 
-	// Append the new Viewport to the Viewports array
-	config.Viewports = append(config.Viewports, newViewport)
+	// Check if the field exists
+	arr, ok := data[fieldName].([]interface{})
+	if !ok {
+		return
+	}
 
-	// Marshal the updated Config struct back to JSON
-	updatedJSON, err := json.MarshalIndent(config, "", "  ")
+	arr = append(arr, newItem)
+	data[fieldName] = arr
+
+	updatedJSON, err := json.MarshalIndent(data, "", "  ")
 	if utils.IsError(err) {
 		fmt.Println("Error marshaling JSON:", err)
 		return
