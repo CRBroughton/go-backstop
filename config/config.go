@@ -142,3 +142,31 @@ func AppendToJSONArray(newItem interface{}, fieldName string) {
 		return
 	}
 }
+
+func RunBackstopCommand(command string, withConfig bool) {
+	workingDIR, err := os.Getwd()
+	if utils.IsError(err) {
+		log.Fatal(err)
+	}
+
+	var JSConfig string
+
+	if withConfig {
+		JSConfig = JSConfig + "--config=.settings/backstop.config.js"
+	}
+
+	args := []string{
+		"run",
+		"--rm",
+		"-v",
+		workingDIR + ":/src",
+		"backstopjs/backstopjs",
+		command,
+		JSConfig,
+	}
+	err = utils.RunCommand("docker", args...)
+
+	if utils.IsError(err) {
+		log.Fatal(err)
+	}
+}
