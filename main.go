@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 
@@ -74,6 +75,15 @@ func (m MainModel) Init() tea.Cmd {
 
 	if errors.Is(err, os.ErrNotExist) {
 		config.RunBackstopCommand("init", false)
+	}
+
+	_, err = os.Stat("backstop.json")
+
+	if err == nil {
+		err = os.Remove("backstop.json")
+		if utils.IsError(err) {
+			log.Fatal(err)
+		}
 	}
 
 	return tea.Batch(m.depChecker.Init())
