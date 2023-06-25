@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"log"
 	"os/exec"
 )
 
@@ -14,13 +13,14 @@ func IsError(err error) bool {
 	return (err != nil)
 }
 
-func RunCommand(command string, loading *bool) bool {
-	*loading = true
-	result, err := exec.Command("bash", "-c", command).Output()
+func RunCommand(command string, args ...string) error {
+	cmd := exec.Command(command, args...)
+
+	err := cmd.Run()
 
 	if IsError(err) {
-		log.Fatal("There was a fatal error running your command: ", err, result)
+		return fmt.Errorf("failed to run Docker command: %v", err)
 	}
-	*loading = false
-	return *loading
+	return nil
+
 }

@@ -2,10 +2,12 @@ package mainmenu
 
 import (
 	"log"
+	"os"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/crbroughton/go-backstop/styles"
+	"github.com/crbroughton/go-backstop/utils"
 )
 
 type (
@@ -21,6 +23,7 @@ type Model struct {
 const (
 	runTests menuItem = iota
 	createNewTest
+	createReferenceImages
 	settingsPage
 )
 
@@ -98,10 +101,42 @@ func Content() []list.Item {
 	return []list.Item{
 		item{title: "Run tests", desc: "Runs all stored tests ", ID: runTests},
 		item{title: "Create new test", desc: "Create a new test", ID: createNewTest},
+		item{title: "Create reference images", desc: "New ref images", ID: createReferenceImages},
 		item{title: "Settings Page", desc: "Update your personal settings", ID: settingsPage},
 	}
 }
 
 func (model *Model) setView(id menuItem) {
 	model.selected = id
+
+	switch id {
+	case createNewTest:
+	case runTests:
+		runBackstopCommand("test")
+	case createReferenceImages:
+		runBackstopCommand("reference")
+
+	}
+}
+
+func runBackstopCommand(command string) {
+	workingDIR, err := os.Getwd()
+	if utils.IsError(err) {
+		log.Fatal(err)
+	}
+
+	args := []string{
+		"run",
+		"--rm",
+		"-v",
+		workingDIR + ":/src",
+		"backstopjs/backstopjs",
+		command,
+		"--config=.settings/backstop.config.js",
+	}
+	err = utils.RunCommand("docker", args...)
+
+	if utils.IsError(err) {
+		log.Fatal(err)
+	}
 }
