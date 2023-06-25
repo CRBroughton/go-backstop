@@ -69,6 +69,8 @@ func (m MainModel) Init() tea.Cmd {
 
 	config.CreateJSON()
 
+	config.RunBackstopCommand("init", false)
+
 	return tea.Batch(m.depChecker.Init())
 }
 

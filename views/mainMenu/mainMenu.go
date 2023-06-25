@@ -2,12 +2,11 @@ package mainmenu
 
 import (
 	"log"
-	"os"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/crbroughton/go-backstop/config"
 	"github.com/crbroughton/go-backstop/styles"
-	"github.com/crbroughton/go-backstop/utils"
 )
 
 type (
@@ -112,31 +111,8 @@ func (model *Model) setView(id menuItem) {
 	switch id {
 	case createNewTest:
 	case runTests:
-		runBackstopCommand("test")
+		config.RunBackstopCommand("test", true)
 	case createReferenceImages:
-		runBackstopCommand("reference")
-
-	}
-}
-
-func runBackstopCommand(command string) {
-	workingDIR, err := os.Getwd()
-	if utils.IsError(err) {
-		log.Fatal(err)
-	}
-
-	args := []string{
-		"run",
-		"--rm",
-		"-v",
-		workingDIR + ":/src",
-		"backstopjs/backstopjs",
-		command,
-		"--config=.settings/backstop.config.js",
-	}
-	err = utils.RunCommand("docker", args...)
-
-	if utils.IsError(err) {
-		log.Fatal(err)
+		config.RunBackstopCommand("reference", true)
 	}
 }
