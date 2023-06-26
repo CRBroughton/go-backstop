@@ -18,9 +18,8 @@ type Viewport struct {
 }
 
 type Scenario struct {
-	Label      string `json:"label"`
-	Url        string `json:"url"`
-	Cookiepath Cookie
+	Label string `json:"label"`
+	Url   string `json:"url"`
 }
 
 type Cookie struct {
