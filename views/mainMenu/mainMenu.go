@@ -10,8 +10,9 @@ import (
 )
 
 type (
-	menuItem         int
-	SettingsSelected bool
+	menuItem               int
+	CreatedNewTestSelected bool
+	SettingsSelected       bool
 )
 
 type Model struct {
@@ -73,6 +74,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if ok {
 				m.setView(item.ID)
 				switch m.selected {
+				case createNewTest:
+					return m, func() tea.Msg {
+						return CreatedNewTestSelected(true)
+					}
 				case settingsPage:
 					return m, func() tea.Msg {
 						return SettingsSelected(true)
@@ -109,7 +114,6 @@ func (model *Model) setView(id menuItem) {
 	model.selected = id
 
 	switch id {
-	case createNewTest:
 	case runTests:
 		config.RunBackstopCommand("test", true)
 	case createReferenceImages:

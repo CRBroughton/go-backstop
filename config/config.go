@@ -18,9 +18,8 @@ type Viewport struct {
 }
 
 type Scenario struct {
-	Label      string `json:"label"`
-	Url        string `json:"url"`
-	Cookiepath Cookie
+	Label string `json:"label"`
+	Url   string `json:"url"`
 }
 
 type Cookie struct {
@@ -164,7 +163,7 @@ func RunBackstopCommand(command string, withConfig bool) {
 		command,
 		JSConfig,
 	}
-	err = utils.RunCommand("docker", args...)
+	_, err = utils.RunCommand("docker", args...)
 
 	if utils.IsError(err) {
 		log.Fatal(err)

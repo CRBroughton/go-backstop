@@ -13,6 +13,7 @@ import (
 	"github.com/crbroughton/go-backstop/utils"
 	depchecker "github.com/crbroughton/go-backstop/views"
 	mainmenu "github.com/crbroughton/go-backstop/views/mainMenu"
+	"github.com/crbroughton/go-backstop/views/mainMenu/createTests"
 	"github.com/crbroughton/go-backstop/views/mainMenu/settings"
 	"github.com/crbroughton/go-backstop/views/mainMenu/settings/cookies"
 	"github.com/crbroughton/go-backstop/views/mainMenu/settings/viewport"
@@ -23,19 +24,21 @@ type sessionState int
 const (
 	depChecker sessionState = iota
 	mainMenu
+	createTestMenu
 	settingsMenu
 	cookieMenu
 	viewportMenu
 )
 
 type MainModel struct {
-	state        sessionState
-	depChecker   tea.Model
-	mainMenu     tea.Model
-	settingsMenu tea.Model
-	cookieMenu   tea.Model
-	viewportMenu tea.Model
-	windowSize   tea.WindowSizeMsg
+	state          sessionState
+	depChecker     tea.Model
+	mainMenu       tea.Model
+	createTestMenu tea.Model
+	settingsMenu   tea.Model
+	cookieMenu     tea.Model
+	viewportMenu   tea.Model
+	windowSize     tea.WindowSizeMsg
 }
 
 func main() {
@@ -52,12 +55,13 @@ func main() {
 
 func New() MainModel {
 	return MainModel{
-		state:        mainMenu,
-		depChecker:   depchecker.New(),
-		mainMenu:     mainmenu.New(),
-		settingsMenu: settings.New(),
-		cookieMenu:   cookies.New(),
-		viewportMenu: viewport.New(),
+		state:          mainMenu,
+		depChecker:     depchecker.New(),
+		mainMenu:       mainmenu.New(),
+		createTestMenu: createTests.New(),
+		settingsMenu:   settings.New(),
+		cookieMenu:     cookies.New(),
+		viewportMenu:   viewport.New(),
 	}
 }
 
@@ -96,6 +100,10 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.windowSize = msg // pass this along to the entry view so it uses the full window size when it's initialized
+	case mainmenu.CreatedNewTestSelected:
+		m.state = createTestMenu
+	case createTests.GoBackToMainMenu:
+		m.state = mainMenu
 	case mainmenu.SettingsSelected:
 		m.state = settingsMenu
 	case settings.GoBackToMainMenu:
@@ -125,6 +133,15 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			panic("could not perform assertion on mainmenu model")
 		}
 		m.mainMenu = mainMenuModel
+		cmd = newCmd
+	case createTestMenu:
+		newCreateTestMenu, newCmd := m.createTestMenu.Update(msg)
+		createTestModel, ok := newCreateTestMenu.(createTests.Model)
+
+		if !ok {
+			panic("could not perform assertion of createtestmenu model")
+		}
+		m.createTestMenu = createTestModel
 		cmd = newCmd
 	case settingsMenu:
 		newSettingsMenu, newCmd := m.settingsMenu.Update(msg)
@@ -163,6 +180,8 @@ func (m MainModel) View() string {
 	switch m.state {
 	case mainMenu:
 		return m.mainMenu.View()
+	case createTestMenu:
+		return m.createTestMenu.View()
 	case settingsMenu:
 		return m.settingsMenu.View()
 	case cookieMenu:
