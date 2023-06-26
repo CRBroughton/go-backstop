@@ -110,6 +110,8 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.state = createTestMenu
 	case createTests.GoBackToMainMenu:
 		m.state = mainMenu
+	case resultsTable.GoBackToSettingsMenu:
+		m.state = mainMenu
 	case mainmenu.SettingsSelected:
 		m.state = settingsMenu
 	case settings.GoBackToMainMenu:
