@@ -77,15 +77,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			s := msg.String()
 
 			if s == "enter" && m.focusIndex == len(m.inputs) {
-				config.AppendToJSONArray(config.Scenario{
-					Label: m.inputs[0].Value(),
-					Url:   m.inputs[1].Value(),
-				}, "scenarios")
+				haveLabel := len(m.inputs[0].Value())
+				haveURL := len(m.inputs[1].Value())
 
-				m = New()
+				if haveLabel > 0 && haveURL > 0 {
 
-				return m, func() tea.Msg {
-					return GoBackToMainMenu(true)
+					config.AppendToJSONArray(config.Scenario{
+						Label: m.inputs[0].Value(),
+						Url:   m.inputs[1].Value(),
+					}, "scenarios")
+
+					m = New()
+
+					return m, func() tea.Msg {
+						return GoBackToMainMenu(true)
+					}
 				}
 			}
 
@@ -97,7 +103,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			if m.focusIndex > len(m.inputs) {
-				m.focusIndex = 0
+				m.focusIndex = 2
 			} else if m.focusIndex < 0 {
 				m.focusIndex = len(m.inputs)
 			}
