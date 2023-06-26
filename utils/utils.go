@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os/exec"
 	"strings"
 )
@@ -29,7 +28,7 @@ func RunCommand(command string, args ...string) (bool, error) {
 	if strings.Contains(output, "Mismatch errors found") {
 		// here return something useful to show
 		// that the tests have failed
-		log.Fatal("Mismatch errors found, check your HTML report")
+		// log.Fatal("Mismatch errors found, check your HTML report")
 		return true, nil
 	}
 

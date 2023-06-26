@@ -11,6 +11,7 @@ import (
 
 type (
 	menuItem               int
+	RunTestsSelected       bool
 	CreatedNewTestSelected bool
 	SettingsSelected       bool
 )
@@ -74,6 +75,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if ok {
 				m.setView(item.ID)
 				switch m.selected {
+				case runTests:
+					return m, func() tea.Msg {
+						return RunTestsSelected(true)
+					}
 				case createNewTest:
 					return m, func() tea.Msg {
 						return CreatedNewTestSelected(true)
