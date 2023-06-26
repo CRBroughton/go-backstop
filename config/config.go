@@ -163,7 +163,7 @@ func RunBackstopCommand(command string, withConfig bool) {
 		command,
 		JSConfig,
 	}
-	err = utils.RunCommand("docker", args...)
+	_, err = utils.RunCommand("docker", args...)
 
 	if utils.IsError(err) {
 		log.Fatal(err)
