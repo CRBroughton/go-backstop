@@ -22,9 +22,9 @@ To do list:
 
 - Add more robust dependency checker
 - Creation of cookies
-- Creation of custom scenarios
+- ~~Creation of custom scenarios~~
 - Improved TUI styling
 - Dynamic loading screens
-- Visualise output of BackstopJS reporting into terminal
+- ~~Visualise output of BackstopJS reporting into terminal~~
 - Better seperate concerns of each view
-- Handle failed tests (application currently `log.fatal`'s if it gets back a failed test)
+- ~~Handle failed tests (application currently `log.fatal`'s if it gets back a failed test)~~

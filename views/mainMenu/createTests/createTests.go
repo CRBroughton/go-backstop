@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/crbroughton/go-backstop/config"
+	"github.com/crbroughton/go-backstop/constants"
 )
 
 var (
@@ -63,17 +65,17 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "esc":
+		switch {
+		case key.Matches(msg, constants.Keymap.Back):
 			m = New()
 			return m, func() tea.Msg {
 				return GoBackToMainMenu(true)
 			}
-		case "ctrl+c":
+		case key.Matches(msg, constants.Keymap.Quit):
 			return m, tea.Quit
 
 		// Set focus to next input
-		case "tab", "shift+tab", "enter", "up", "down":
+		case key.Matches(msg, constants.Keymap.Focus):
 			s := msg.String()
 
 			if s == "enter" && m.focusIndex == len(m.inputs) {
