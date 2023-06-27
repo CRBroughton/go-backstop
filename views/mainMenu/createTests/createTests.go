@@ -1,12 +1,7 @@
-package viewport
-
-// A simple example demonstrating the use of multiple text input components
-// from the Bubbles component library.
+package createTests
 
 import (
 	"fmt"
-	"log"
-	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -15,7 +10,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/crbroughton/go-backstop/config"
 	"github.com/crbroughton/go-backstop/constants"
-	"github.com/crbroughton/go-backstop/utils"
 )
 
 var (
@@ -30,7 +24,7 @@ var (
 )
 
 type (
-	GoBackToSettingsMenu bool
+	GoBackToMainMenu bool
 )
 
 type Model struct {
@@ -40,7 +34,7 @@ type Model struct {
 
 func New() Model {
 	m := Model{
-		inputs: make([]textinput.Model, 3),
+		inputs: make([]textinput.Model, 2),
 	}
 
 	var t textinput.Model
@@ -50,14 +44,12 @@ func New() Model {
 
 		switch i {
 		case 0:
-			t.Placeholder = "Name"
+			t.Placeholder = "Label"
 			t.Focus()
 			t.PromptStyle = focusedStyle
 			t.TextStyle = focusedStyle
 		case 1:
-			t.Placeholder = "Width - example: 1280 (numbers)"
-		case 2:
-			t.Placeholder = "Height - example: 768 (numbers)"
+			t.Placeholder = "URL"
 		}
 
 		m.inputs[i] = t
@@ -77,7 +69,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, constants.Keymap.Back):
 			m = New()
 			return m, func() tea.Msg {
-				return GoBackToSettingsMenu(true)
+				return GoBackToMainMenu(true)
 			}
 		case key.Matches(msg, constants.Keymap.Quit):
 			return m, tea.Quit
@@ -86,31 +78,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, constants.Keymap.Focus):
 			s := msg.String()
 
-			// Did the user press enter while the submit button was focused?
-			// If so, exit.
 			if s == "enter" && m.focusIndex == len(m.inputs) {
-				width, err := strconv.Atoi(m.inputs[1].Value())
+				haveLabel := len(m.inputs[0].Value())
+				haveURL := len(m.inputs[1].Value())
 
-				if utils.IsError(err) {
-					log.Fatal("Couldn't convert the width you entered")
-				}
+				if haveLabel > 0 && haveURL > 0 {
 
-				height, err := strconv.Atoi(m.inputs[2].Value())
+					config.AppendToJSONArray(config.Scenario{
+						Label: m.inputs[0].Value(),
+						Url:   m.inputs[1].Value(),
+					}, "scenarios")
 
-				if utils.IsError(err) {
-					log.Fatal("Couldn't convert the height you entered")
-				}
+					m = New()
 
-				config.AppendToJSONArray(config.Viewport{
-					Name:   m.inputs[0].Value(),
-					Width:  width,
-					Height: height,
-				}, "viewports")
-
-				m = New()
-
-				return m, func() tea.Msg {
-					return GoBackToSettingsMenu(true)
+					return m, func() tea.Msg {
+						return GoBackToMainMenu(true)
+					}
 				}
 			}
 
@@ -122,7 +105,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			if m.focusIndex > len(m.inputs) {
-				m.focusIndex = 0
+				m.focusIndex = 2
 			} else if m.focusIndex < 0 {
 				m.focusIndex = len(m.inputs)
 			}

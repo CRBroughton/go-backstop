@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/charmbracelet/bubbles/table"
 	"github.com/crbroughton/go-backstop/utils"
 )
 
@@ -18,9 +19,8 @@ type Viewport struct {
 }
 
 type Scenario struct {
-	Label      string `json:"label"`
-	Url        string `json:"url"`
-	Cookiepath Cookie
+	Label string `json:"label"`
+	Url   string `json:"url"`
 }
 
 type Cookie struct {
@@ -30,9 +30,15 @@ type Cookie struct {
 }
 
 type Config struct {
-	Viewports []Viewport `json:"viewports"`
-	Scenarios []Scenario `json:"scenarios"`
-	Cookies   []Cookie   `json:"cookies"`
+	Viewports    []Viewport   `json:"viewports"`
+	Scenarios    []Scenario   `json:"scenarios"`
+	Cookies      []Cookie     `json:"cookies"`
+	ResultsTable ResultsTable `json:"resultstable"`
+}
+
+type ResultsTable struct {
+	Height int `json:"height"`
+	Width  int `json:"width"`
 }
 
 const settingsFolder = ".settings"
@@ -40,6 +46,10 @@ const settingsPath = ".settings/config.json"
 
 func defaultViewports() Config {
 	config := Config{
+		ResultsTable: ResultsTable{
+			Height: 10,
+			Width:  200,
+		},
 		Viewports: []Viewport{
 			{
 				Name:   "desktop",
@@ -104,6 +114,26 @@ func WriteDefaultConfiguration() {
 	}
 }
 
+func GetTableWidthHeight() (int, int) {
+	// Read JSON file
+	file, err := ioutil.ReadFile(settingsPath)
+	if utils.IsError(err) {
+		fmt.Println("Error reading file:", err)
+		return 0, 0
+	}
+
+	// Unmarshal JSON
+	var data Config
+	if err := json.Unmarshal(file, &data); err != nil {
+		fmt.Println("Error marshaling JSON:", err)
+		return 0, 0
+	}
+
+	resultsTable := data.ResultsTable
+
+	return resultsTable.Width, resultsTable.Height
+}
+
 // AppendToJSONArray appends a new struct to the configuration file
 func AppendToJSONArray(newItem interface{}, fieldName string) {
 	// Read JSON file
@@ -164,9 +194,87 @@ func RunBackstopCommand(command string, withConfig bool) {
 		command,
 		JSConfig,
 	}
-	err = utils.RunCommand("docker", args...)
+	_, err = utils.RunCommand("docker", args...)
 
 	if utils.IsError(err) {
 		log.Fatal(err)
 	}
+}
+
+type Test struct {
+	Pair   Pair   `json:"pair"`
+	Status string `json:"status"`
+}
+
+type Pair struct {
+	Label         string `json:"label"`
+	ViewportLabel string `json:"viewportLabel"`
+}
+
+func GetTestResults() ([]table.Row, error) {
+	var result []table.Row
+	var obj map[string]interface{}
+
+	// Read JSON file
+	file, err := ioutil.ReadFile("backstop_data/json_report/jsonReport.json")
+	if utils.IsError(err) {
+		fmt.Println("Error reading file:", err)
+		return nil, nil
+	}
+
+	err = json.Unmarshal(file, &obj)
+	if utils.IsError(err) {
+		return nil, err
+	}
+
+	tests, ok := obj["tests"].([]interface{})
+	if !ok {
+		return nil, errors.New("invalid 'tests' field")
+	}
+
+	for _, t := range tests {
+		test, ok := t.(map[string]interface{})
+		if !ok {
+			return nil, errors.New("invalid test object")
+		}
+
+		pairObj, ok := test["pair"].(map[string]interface{})
+		if !ok {
+			return nil, errors.New("invalid pair object")
+		}
+
+		label, ok := pairObj["label"].(string)
+
+		if !ok {
+			return nil, errors.New("invalid 'label' field")
+		}
+
+		viewportLabel, ok := pairObj["viewportLabel"].(string)
+		if !ok {
+			return nil, errors.New("invalid 'viewportLabel' field")
+		}
+
+		status, ok := test["status"].(string)
+		if !ok {
+			return nil, errors.New("invalid 'status' field")
+		}
+
+		var updatedStatus string
+
+		if status == "pass" {
+			updatedStatus = "pass" + " ✅"
+		} else {
+			updatedStatus = "fail" + " ❌"
+		}
+
+		row := table.Row{
+			label,
+			viewportLabel,
+			updatedStatus,
+		}
+
+		result = append(result, row)
+	}
+
+	return result, nil
 }

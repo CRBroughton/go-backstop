@@ -3,15 +3,19 @@ package mainmenu
 import (
 	"log"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/crbroughton/go-backstop/config"
+	"github.com/crbroughton/go-backstop/constants"
 	"github.com/crbroughton/go-backstop/styles"
 )
 
 type (
-	menuItem         int
-	SettingsSelected bool
+	menuItem               int
+	RunTestsSelected       bool
+	CreatedNewTestSelected bool
+	SettingsSelected       bool
 )
 
 type Model struct {
@@ -64,8 +68,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.list.SetSize(msg.Width-h, msg.Height-v)
 
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "enter":
+		switch {
+		case key.Matches(msg, constants.Keymap.Enter):
 			item, ok := m.list.SelectedItem().(item)
 			if !ok {
 				log.Fatal("v ...any")
@@ -73,6 +77,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if ok {
 				m.setView(item.ID)
 				switch m.selected {
+				case runTests:
+					return m, func() tea.Msg {
+						return RunTestsSelected(true)
+					}
+				case createNewTest:
+					return m, func() tea.Msg {
+						return CreatedNewTestSelected(true)
+					}
 				case settingsPage:
 					return m, func() tea.Msg {
 						return SettingsSelected(true)
@@ -109,7 +121,6 @@ func (model *Model) setView(id menuItem) {
 	model.selected = id
 
 	switch id {
-	case createNewTest:
 	case runTests:
 		config.RunBackstopCommand("test", true)
 	case createReferenceImages:
