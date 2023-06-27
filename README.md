@@ -21,7 +21,7 @@ Go, Backstop! requires the following:
 To do list:
 
 - Add more robust dependency checker
-- Creation of cookies
+- Creation of cookies - partially done
 - ~~Creation of custom scenarios~~
 - Improved TUI styling
 - Dynamic loading screens
