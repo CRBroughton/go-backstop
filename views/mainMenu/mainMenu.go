@@ -3,9 +3,11 @@ package mainmenu
 import (
 	"log"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/crbroughton/go-backstop/config"
+	"github.com/crbroughton/go-backstop/constants"
 	"github.com/crbroughton/go-backstop/styles"
 )
 
@@ -66,8 +68,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.list.SetSize(msg.Width-h, msg.Height-v)
 
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "enter":
+		switch {
+		case key.Matches(msg, constants.Keymap.Enter):
 			item, ok := m.list.SelectedItem().(item)
 			if !ok {
 				log.Fatal("v ...any")

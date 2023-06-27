@@ -7,6 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/crbroughton/go-backstop/config"
+	"github.com/crbroughton/go-backstop/styles"
 	"github.com/crbroughton/go-backstop/utils"
 )
 
@@ -44,7 +45,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return " BackstopJS Test Results: " + "\n" + baseStyle.Render(m.table.View()) + "\n" + " Press ESC to return to main menu"
+	return styles.TitleStyle.Render(" BackstopJS Test Results: ") + "\n" + baseStyle.Render(m.table.View()) + "\n" + " Press ESC to return to main menu"
 }
 
 func New() Model {
