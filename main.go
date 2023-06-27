@@ -112,18 +112,25 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.state = mainMenu
 	case resultsTable.GoBackToSettingsMenu:
 		m.state = mainMenu
+		m.resultsTableMenu, cmd = m.resultsTableMenu.Update(m.windowSize)
 	case mainmenu.SettingsSelected:
 		m.state = settingsMenu
+		m.settingsMenu, cmd = m.settingsMenu.Update(m.windowSize)
 	case settings.GoBackToMainMenu:
 		m.state = mainMenu
+		m.mainMenu, cmd = m.mainMenu.Update(m.windowSize)
 	case settings.GoToViewPort:
 		m.state = viewportMenu
+		m.viewportMenu, cmd = m.viewportMenu.Update(m.windowSize)
 	case settings.GoToCookie:
 		m.state = cookieMenu
+		m.cookieMenu, cmd = m.cookieMenu.Update(m.windowSize)
 	case viewport.GoBackToSettingsMenu:
 		m.state = settingsMenu
+		m.settingsMenu, cmd = m.settingsMenu.Update(m.windowSize)
 	case cookies.GoBackToSettingsMenu:
 		m.state = settingsMenu
+		m.settingsMenu, cmd = m.settingsMenu.Update(m.windowSize)
 	case spinner.TickMsg:
 		m.depChecker, cmd = m.depChecker.Update(msg)
 		cmds = append(cmds, cmd)
