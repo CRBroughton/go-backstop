@@ -7,6 +7,7 @@ Go, Backstop! currently can:
 - Create new custom viewports
 - Create reference images
 - Run existing tests
+- Visualise results of JSON report in the terminal
 
 ## Dependencies & Getting Started
 
