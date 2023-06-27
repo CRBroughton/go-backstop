@@ -134,60 +134,24 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.depChecker, cmd = m.depChecker.Update(msg)
 		cmds = append(cmds, cmd)
 	case mainMenu:
-		newMainMenu, newCmd := m.mainMenu.Update(msg)
-		mainMenuModel, ok := newMainMenu.(mainmenu.Model)
-
-		if !ok {
-			panic("could not perform assertion on mainmenu model")
-		}
-		m.mainMenu = mainMenuModel
-		cmd = newCmd
+		m.mainMenu, cmd = m.mainMenu.Update(msg)
+		cmds = append(cmds, cmd)
 	case resultsTableMenu:
-		newResultsTableMenu, newCmd := m.resultsTableMenu.Update(msg)
-		resultsTableModel, ok := newResultsTableMenu.(resultsTable.Model)
-
-		if !ok {
-			panic("could not perform assertion on resultstablemenu model")
-		}
-
-		m.resultsTableMenu = resultsTableModel
-		cmd = newCmd
+		m.resultsTableMenu, cmd = m.resultsTableMenu.Update(msg)
+		cmds = append(cmds, cmd)
 	case createTestMenu:
-		newCreateTestMenu, newCmd := m.createTestMenu.Update(msg)
-		createTestModel, ok := newCreateTestMenu.(createTests.Model)
-
-		if !ok {
-			panic("could not perform assertion of createtestmenu model")
-		}
-		m.createTestMenu = createTestModel
-		cmd = newCmd
+		m.createTestMenu, cmd = m.createTestMenu.Update(msg)
+		cmds = append(cmds, cmd)
 	case settingsMenu:
-		newSettingsMenu, newCmd := m.settingsMenu.Update(msg)
-		settingsMenumodel, ok := newSettingsMenu.(settings.Model)
+		m.settingsMenu, cmd = m.settingsMenu.Update(msg)
+		cmds = append(cmds, cmd)
 
-		if !ok {
-			panic("could not perform assertion on settingsmenu model")
-		}
-		m.settingsMenu = settingsMenumodel
-		cmd = newCmd
 	case cookieMenu:
-		newCookieMenu, newCmd := m.cookieMenu.Update(msg)
-		cookieMenuModel, ok := newCookieMenu.(cookies.Model)
-
-		if !ok {
-			panic("could not perform assertion on cookiemenu model")
-		}
-		m.cookieMenu = cookieMenuModel
-		cmd = newCmd
+		m.cookieMenu, cmd = m.cookieMenu.Update(msg)
+		cmds = append(cmds, cmd)
 	case viewportMenu:
-		newViewportMenu, newCmd := m.viewportMenu.Update(msg)
-		viewportMenuModel, ok := newViewportMenu.(viewport.Model)
-
-		if !ok {
-			panic("could not perform assertion on viewportmenu model")
-		}
-		m.viewportMenu = viewportMenuModel
-		cmd = newCmd
+		m.viewportMenu, cmd = m.viewportMenu.Update(msg)
+		cmds = append(cmds, cmd)
 	}
 
 	cmds = append(cmds, cmd)
