@@ -30,9 +30,15 @@ type Cookie struct {
 }
 
 type Config struct {
-	Viewports []Viewport `json:"viewports"`
-	Scenarios []Scenario `json:"scenarios"`
-	Cookies   []Cookie   `json:"cookies"`
+	Viewports    []Viewport   `json:"viewports"`
+	Scenarios    []Scenario   `json:"scenarios"`
+	Cookies      []Cookie     `json:"cookies"`
+	ResultsTable ResultsTable `json:"resultstable"`
+}
+
+type ResultsTable struct {
+	Height int `json:"height"`
+	Width  int `json:"width"`
 }
 
 const settingsFolder = ".settings"
@@ -40,6 +46,10 @@ const settingsPath = ".settings/config.json"
 
 func defaultViewports() Config {
 	config := Config{
+		ResultsTable: ResultsTable{
+			Height: 10,
+			Width:  200,
+		},
 		Viewports: []Viewport{
 			{
 				Name:   "desktop",
@@ -102,6 +112,26 @@ func WriteDefaultConfiguration() {
 	if utils.IsError(err) {
 		log.Fatal("Failed to write default configuration to the JSON file")
 	}
+}
+
+func GetTableWidthHeight() (int, int) {
+	// Read JSON file
+	file, err := ioutil.ReadFile(settingsPath)
+	if utils.IsError(err) {
+		fmt.Println("Error reading file:", err)
+		return 0, 0
+	}
+
+	// Unmarshal JSON
+	var data Config
+	if err := json.Unmarshal(file, &data); err != nil {
+		fmt.Println("Error marshaling JSON:", err)
+		return 0, 0
+	}
+
+	resultsTable := data.ResultsTable
+
+	return resultsTable.Width, resultsTable.Height
 }
 
 // AppendToJSONArray appends a new struct to the configuration file

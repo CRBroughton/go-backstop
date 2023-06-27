@@ -61,11 +61,14 @@ func New() Model {
 		log.Fatal("Could not get test results")
 	}
 
+	width, height := config.GetTableWidthHeight()
+
 	t := table.New(
 		table.WithColumns(columns),
 		table.WithRows(rows),
 		table.WithFocused(true),
-		table.WithHeight(7),
+		table.WithWidth(width),
+		table.WithHeight(height),
 	)
 
 	s := table.DefaultStyles()
