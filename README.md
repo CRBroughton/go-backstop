@@ -17,6 +17,17 @@ Go, Backstop! requires the following:
 - Docker
 - The latest version of backstopJS docker image: ``docker pull backstopjs/backstopjs``
 
+
+With the lastest `backstopjs` image downloaded, starting Go, Backstop! with `go run main.go` with initialise the project and `backstopjs`. Once initialised, you can create
+a new test scenario in the main menu, and then test your scenario by running your existing test suite.
+
+Go, Backstop! will create a `.settings` folder, where you can find your JSON configuration file.
+
+
+If you wish to change the size of the table that shows your test results, simply change
+the `resultstable` object in your configuration file; These values must be numbers.
+
+
 ---
 
 To do list:
