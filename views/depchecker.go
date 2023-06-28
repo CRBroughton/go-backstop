@@ -7,10 +7,12 @@ import (
 	"fmt"
 	"os/exec"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/crbroughton/go-backstop/config"
+	"github.com/crbroughton/go-backstop/constants"
 	"github.com/crbroughton/go-backstop/utils"
 )
 
@@ -54,8 +56,8 @@ func (m *Model) checkDocker() {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "q", "esc", "ctrl+c":
+		switch {
+		case key.Matches(msg, constants.Keymap.Quit):
 			m.quitting = true
 			return m, tea.Quit
 		default:

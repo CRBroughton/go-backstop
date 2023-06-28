@@ -3,10 +3,12 @@ package resultsTable
 import (
 	"log"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/crbroughton/go-backstop/config"
+	"github.com/crbroughton/go-backstop/constants"
 	"github.com/crbroughton/go-backstop/styles"
 	"github.com/crbroughton/go-backstop/utils"
 )
@@ -27,14 +29,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "esc":
+		switch {
+		case key.Matches(msg, constants.Keymap.Back):
 			return m, func() tea.Msg {
 				return GoBackToSettingsMenu(true)
 			}
-		case "q", "ctrl+c":
+		case key.Matches(msg, constants.Keymap.Quit):
 			return m, tea.Quit
-		case "enter":
+		case key.Matches(msg, constants.Keymap.Enter):
 			return m, tea.Batch(
 				tea.Printf("Let's go to %s!", m.table.SelectedRow()[1]),
 			)

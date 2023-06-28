@@ -58,14 +58,9 @@ func main() {
 
 func New() MainModel {
 	return MainModel{
-		state:            mainMenu,
-		depChecker:       depchecker.New(),
-		mainMenu:         mainmenu.New(),
-		resultsTableMenu: resultsTable.New(),
-		createTestMenu:   createTests.New(),
-		settingsMenu:     settings.New(),
-		cookieMenu:       cookies.New(),
-		viewportMenu:     viewport.New(),
+		state:      mainMenu,
+		depChecker: depchecker.New(),
+		mainMenu:   mainmenu.New(),
 	}
 }
 
@@ -106,8 +101,10 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.windowSize = msg // pass this along to the entry view so it uses the full window size when it's initialized
 	case mainmenu.RunTestsSelected:
 		m.state = resultsTableMenu
+		m.resultsTableMenu = resultsTable.New()
 	case mainmenu.CreatedNewTestSelected:
 		m.state = createTestMenu
+		m.createTestMenu = createTests.New()
 	case createTests.GoBackToMainMenu:
 		m.state = mainMenu
 	case resultsTable.GoBackToSettingsMenu:
@@ -115,15 +112,18 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.resultsTableMenu, cmd = m.resultsTableMenu.Update(m.windowSize)
 	case mainmenu.SettingsSelected:
 		m.state = settingsMenu
+		m.settingsMenu = settings.New()
 		m.settingsMenu, cmd = m.settingsMenu.Update(m.windowSize)
 	case settings.GoBackToMainMenu:
 		m.state = mainMenu
 		m.mainMenu, cmd = m.mainMenu.Update(m.windowSize)
 	case settings.GoToViewPort:
 		m.state = viewportMenu
+		m.viewportMenu = viewport.New()
 		m.viewportMenu, cmd = m.viewportMenu.Update(m.windowSize)
 	case settings.GoToCookie:
 		m.state = cookieMenu
+		m.cookieMenu = cookies.New()
 		m.cookieMenu, cmd = m.cookieMenu.Update(m.windowSize)
 	case viewport.GoBackToSettingsMenu:
 		m.state = settingsMenu
