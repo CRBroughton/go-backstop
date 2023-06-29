@@ -4,8 +4,8 @@ package depchecker
 // component library.
 
 import (
-	"fmt"
 	"os/exec"
+	"time"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
@@ -14,15 +14,21 @@ import (
 	"github.com/crbroughton/go-backstop/config"
 	"github.com/crbroughton/go-backstop/constants"
 	"github.com/crbroughton/go-backstop/utils"
+	"github.com/muesli/reflow/indent"
 )
 
-type errMsg error
+type dockerNotInstalled time.Duration
+type dependenciesInstalled time.Duration
+
+type result struct {
+	duration time.Duration
+	emoji    string
+}
 
 type Model struct {
-	Spinner  spinner.Model
-	quitting bool
-	err      error
-	docker   bool
+	Spinner spinner.Model
+	result  result
+	hasDeps bool
 }
 
 func New() Model {
@@ -31,26 +37,27 @@ func New() Model {
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	return Model{
 		Spinner: s,
-		docker:  true,
 	}
 }
 
 func (m Model) Init() tea.Cmd {
-	m.checkDocker()
-	return m.Spinner.Tick
+	return tea.Batch(m.Spinner.Tick, m.checkDocker)
 }
 
-func (m *Model) checkDocker() {
+func (m *Model) checkDocker() tea.Msg {
+	pause := time.Duration(time.Second)
+	time.Sleep(pause)
 	_, err := exec.LookPath("docker")
 
 	if utils.IsError(err) {
-		m.docker = false
-		return
-		// fmt.Println("Could not find docker; Please install docker")
-		// os.Exit(1)
+		m.hasDeps = false
+		return dockerNotInstalled(pause)
+
 	}
 
 	config.CreateJSON()
+	m.hasDeps = true
+	return dependenciesInstalled(pause)
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -58,14 +65,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, constants.Keymap.Quit):
-			m.quitting = true
 			return m, tea.Quit
 		default:
 			return m, nil
 		}
 
-	case errMsg:
-		m.err = msg
+	case dependenciesInstalled:
+		d := time.Duration(msg)
+		m.result = result{emoji: "✅", duration: d}
+		m.hasDeps = true
+		return m, nil
+
+	case dockerNotInstalled:
+		d := time.Duration(msg)
+		m.result = result{emoji: "❌", duration: d}
+		m.hasDeps = false
 		return m, nil
 
 	default:
@@ -76,5 +90,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return fmt.Sprintf("\n\n   %s Checking dependencies, press ESC to quit...\n\n", m.Spinner.View())
+	s := "\n" +
+		m.Spinner.View() + " Checking dependencies, press ESC to quit...\n\n"
+
+	if !m.hasDeps && len(m.result.emoji) > 0 {
+		s := "\n" + m.result.emoji + " Docker is not installed! :( \n\n"
+		s += ("\nPress any key to exit\n")
+
+		return indent.String(s, 1)
+	}
+
+	if m.hasDeps && len(m.result.emoji) > 0 {
+		s := "\n" + m.result.emoji + " Dependency requirements met! \n\n"
+		s += ("\nPress any key to exit\n")
+		return indent.String(s, 1)
+	}
+
+	s += ("\nPress any key to exit\n")
+
+	return indent.String(s, 1)
 }
