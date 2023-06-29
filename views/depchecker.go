@@ -13,11 +13,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/crbroughton/go-backstop/config"
 	"github.com/crbroughton/go-backstop/constants"
+	"github.com/crbroughton/go-backstop/docker"
 	"github.com/crbroughton/go-backstop/utils"
 	"github.com/muesli/reflow/indent"
 )
 
 type dockerNotInstalled time.Duration
+type dockerInstalled bool
 type dependenciesInstalled time.Duration
 
 type result struct {
@@ -26,9 +28,11 @@ type result struct {
 }
 
 type Model struct {
-	Spinner spinner.Model
-	result  result
-	hasDeps bool
+	Spinner     spinner.Model
+	result      result
+	hasDeps     bool
+	hasBackstop bool
+	hasDocker   bool
 }
 
 func New() Model {
@@ -41,7 +45,8 @@ func New() Model {
 }
 
 func (m Model) Init() tea.Cmd {
-	return tea.Batch(m.Spinner.Tick, m.checkDocker)
+
+	return tea.Batch(m.Spinner.Tick, m.checkDocker, docker.CheckForImage)
 }
 
 func (m *Model) checkDocker() tea.Msg {
@@ -56,8 +61,8 @@ func (m *Model) checkDocker() tea.Msg {
 	}
 
 	config.CreateJSON()
-	m.hasDeps = true
-	return dependenciesInstalled(pause)
+
+	return dockerInstalled(true)
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -70,16 +75,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
-	case dependenciesInstalled:
-		d := time.Duration(msg)
-		m.result = result{emoji: "✅", duration: d}
-		m.hasDeps = true
+	case docker.BackstopImageInstalled:
+		m.hasBackstop = true
 		return m, nil
 
-	case dockerNotInstalled:
-		d := time.Duration(msg)
-		m.result = result{emoji: "❌", duration: d}
-		m.hasDeps = false
+	case dockerInstalled:
+		m.hasDocker = true
 		return m, nil
 
 	default:
@@ -95,18 +96,29 @@ func (m Model) View() string {
 
 	if !m.hasDeps && len(m.result.emoji) > 0 {
 		s := "\n" + m.result.emoji + " Docker is not installed! :( \n\n"
-		s += ("\nPress any key to exit\n")
+		s += ("\n\nPress any key to exit\n")
 
 		return indent.String(s, 1)
 	}
 
-	if m.hasDeps && len(m.result.emoji) > 0 {
-		s := "\n" + m.result.emoji + " Dependency requirements met! \n\n"
-		s += ("\nPress any key to exit\n")
-		return indent.String(s, 1)
+	if m.hasBackstop {
+		s = s + "\n" + "✅ Backstop Installed!"
+	} else {
+		s = s + "\n" + "❌ Backstop image not found"
 	}
 
-	s += ("\nPress any key to exit\n")
+	if m.hasDocker {
+		s = s + "\n" + m.result.emoji + "✅ Docker found!"
+	} else {
+		s = s + "\n" + "❌ Docker not found, searching..."
+
+	}
+
+	if m.hasDocker && m.hasBackstop {
+		s = s + "\n" + "✅ Dependency requirements met!"
+	}
+
+	s += ("\n\nPress any key to exit\n")
 
 	return indent.String(s, 1)
 }

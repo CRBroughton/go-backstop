@@ -58,7 +58,7 @@ func main() {
 
 func New() MainModel {
 	return MainModel{
-		state:      mainMenu,
+		state:      depChecker,
 		depChecker: depchecker.New(),
 		mainMenu:   mainmenu.New(),
 	}
