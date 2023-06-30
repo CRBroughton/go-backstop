@@ -99,6 +99,10 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.windowSize = msg // pass this along to the entry view so it uses the full window size when it's initialized
+	case depchecker.DependenciesInstalled:
+		m.state = mainMenu
+		m.mainMenu = mainmenu.New()
+		m.mainMenu, cmd = m.mainMenu.Update(m.windowSize)
 	case mainmenu.RunTestsSelected:
 		m.state = resultsTableMenu
 		m.resultsTableMenu = resultsTable.New()

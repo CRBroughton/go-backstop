@@ -20,11 +20,10 @@ import (
 
 type dockerNotInstalled time.Duration
 type dockerInstalled bool
-type dependenciesInstalled time.Duration
+type DependenciesInstalled bool
 
 type result struct {
-	duration time.Duration
-	emoji    string
+	emoji string
 }
 
 type Model struct {
@@ -55,7 +54,7 @@ func (m *Model) checkDocker() tea.Msg {
 	_, err := exec.LookPath("docker")
 
 	if utils.IsError(err) {
-		m.hasDeps = false
+		m.hasDocker = false
 		return dockerNotInstalled(pause)
 
 	}
@@ -83,8 +82,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.hasDocker = true
 		return m, nil
 
+	case dockerNotInstalled:
+		m.hasDocker = false
+		m.result = result{emoji: "❌"}
+		return m, nil
+
 	default:
 		var cmd tea.Cmd
+		if m.hasBackstop && m.hasDocker {
+			return m, func() tea.Msg {
+				return DependenciesInstalled(true)
+			}
+		}
 		m.Spinner, cmd = m.Spinner.Update(msg)
 		return m, cmd
 	}
@@ -94,7 +103,7 @@ func (m Model) View() string {
 	s := "\n" +
 		m.Spinner.View() + " Checking dependencies, press ESC to quit...\n\n"
 
-	if !m.hasDeps && len(m.result.emoji) > 0 {
+	if !m.hasDocker && len(m.result.emoji) > 0 {
 		s := "\n" + m.result.emoji + " Docker is not installed! :( \n\n"
 		s += ("\n\nPress any key to exit\n")
 
