@@ -152,7 +152,7 @@ func GetDependencyCheck() bool {
 	// Read JSON file
 	file, err := ioutil.ReadFile(settingsPath)
 	if utils.IsError(err) {
-		fmt.Println("Error reading file:", err)
+		return false
 	}
 
 	// Unmarshal JSON
