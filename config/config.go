@@ -29,11 +29,14 @@ type Cookie struct {
 	Value  string `json:"value"`
 }
 
+type passedDependencyChecker bool
+
 type Config struct {
-	Viewports    []Viewport   `json:"viewports"`
-	Scenarios    []Scenario   `json:"scenarios"`
-	Cookies      []Cookie     `json:"cookies"`
-	ResultsTable ResultsTable `json:"resultstable"`
+	Viewports               []Viewport              `json:"viewports"`
+	Scenarios               []Scenario              `json:"scenarios"`
+	Cookies                 []Cookie                `json:"cookies"`
+	ResultsTable            ResultsTable            `json:"resultstable"`
+	PassedDependencyChecker passedDependencyChecker `json:"passedDependencyChecker"`
 }
 
 type ResultsTable struct {
@@ -62,8 +65,9 @@ func defaultViewports() Config {
 				Height: 844,
 			},
 		},
-		Scenarios: []Scenario{},
-		Cookies:   []Cookie{},
+		Scenarios:               []Scenario{},
+		Cookies:                 []Cookie{},
+		PassedDependencyChecker: false,
 	}
 	return config
 }
@@ -112,6 +116,52 @@ func WriteDefaultConfiguration() {
 	if utils.IsError(err) {
 		log.Fatal("Failed to write default configuration to the JSON file")
 	}
+}
+
+func SetDependencyCheck() {
+	// Read JSON file
+	file, err := ioutil.ReadFile(settingsPath)
+	if utils.IsError(err) {
+		fmt.Println("Error reading file:", err)
+	}
+
+	// Unmarshal JSON
+	var data Config
+	if err := json.Unmarshal(file, &data); err != nil {
+		fmt.Println("Error marshaling JSON:", err)
+	}
+
+	data.PassedDependencyChecker = true
+
+	updatedJSON, err := json.MarshalIndent(data, "", "  ")
+	if utils.IsError(err) {
+		fmt.Println("Error marshaling JSON:", err)
+		return
+	}
+
+	// Write the updated JSON to a file
+	err = ioutil.WriteFile(settingsPath, updatedJSON, 0644)
+	if utils.IsError(err) {
+		fmt.Println("Error writing file:", err)
+		return
+	}
+
+}
+
+func GetDependencyCheck() bool {
+	// Read JSON file
+	file, err := ioutil.ReadFile(settingsPath)
+	if utils.IsError(err) {
+		return false
+	}
+
+	// Unmarshal JSON
+	var data Config
+	if err := json.Unmarshal(file, &data); err != nil {
+		fmt.Println("Error marshaling JSON:", err)
+	}
+
+	return bool(data.PassedDependencyChecker)
 }
 
 func GetTableWidthHeight() (int, int) {

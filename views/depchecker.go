@@ -4,8 +4,8 @@ package depchecker
 // component library.
 
 import (
-	"fmt"
 	"os/exec"
+	"time"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
@@ -13,16 +13,25 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/crbroughton/go-backstop/config"
 	"github.com/crbroughton/go-backstop/constants"
+	"github.com/crbroughton/go-backstop/docker"
 	"github.com/crbroughton/go-backstop/utils"
+	"github.com/muesli/reflow/indent"
 )
 
-type errMsg error
+type dockerNotInstalled time.Duration
+type dockerInstalled bool
+type DependenciesInstalled bool
+
+type result struct {
+	emoji string
+}
 
 type Model struct {
-	Spinner  spinner.Model
-	quitting bool
-	err      error
-	docker   bool
+	Spinner     spinner.Model
+	result      result
+	hasDeps     bool
+	hasBackstop bool
+	hasDocker   bool
 }
 
 func New() Model {
@@ -31,26 +40,27 @@ func New() Model {
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	return Model{
 		Spinner: s,
-		docker:  true,
 	}
 }
 
 func (m Model) Init() tea.Cmd {
-	m.checkDocker()
-	return m.Spinner.Tick
+	return tea.Batch(m.Spinner.Tick, m.checkDocker, docker.CheckForImage)
 }
 
-func (m *Model) checkDocker() {
+func (m *Model) checkDocker() tea.Msg {
+	pause := time.Duration(time.Second)
+	time.Sleep(pause)
 	_, err := exec.LookPath("docker")
 
 	if utils.IsError(err) {
-		m.docker = false
-		return
-		// fmt.Println("Could not find docker; Please install docker")
-		// os.Exit(1)
+		m.hasDocker = false
+		return dockerNotInstalled(pause)
+
 	}
 
 	config.CreateJSON()
+
+	return dockerInstalled(true)
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -58,23 +68,76 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, constants.Keymap.Quit):
-			m.quitting = true
 			return m, tea.Quit
 		default:
 			return m, nil
 		}
 
-	case errMsg:
-		m.err = msg
+	case docker.BackstopImageInstalled:
+		m.hasBackstop = true
+		return m, nil
+
+	case dockerInstalled:
+		m.hasDocker = true
+		return m, nil
+
+	case dockerNotInstalled:
+		m.hasDocker = false
+		m.result = result{emoji: "❌"}
 		return m, nil
 
 	default:
 		var cmd tea.Cmd
+		if m.hasBackstop && m.hasDocker {
+			return m, func() tea.Msg {
+				pause := time.Duration(time.Second)
+				time.Sleep(pause)
+				config.SetDependencyCheck()
+				return DependenciesInstalled(true)
+			}
+		}
 		m.Spinner, cmd = m.Spinner.Update(msg)
 		return m, cmd
 	}
 }
 
 func (m Model) View() string {
-	return fmt.Sprintf("\n\n   %s Checking dependencies, press ESC to quit...\n\n", m.Spinner.View())
+	var spinnerMsg = m.Spinner.View() + " Checking dependencies, press ESC to quit...\n\n"
+	s := "\n" + spinnerMsg
+
+	// docker
+	var hasDocker = "\n" + m.result.emoji + "✅ Docker found!"
+	var noDocker = "\n" + "❌ Docker not found, searching..."
+
+	// backstop
+	var hasBackstop = "\n" + "✅ Backstop Installed!"
+	var noBackstop = "\n" + "❌ Backstop image not found"
+
+	if !m.hasDocker && len(m.result.emoji) > 0 {
+		s := "\n" + m.result.emoji + " Docker is not installed! :( \n\n"
+		s += ("\n\nPress any key to exit\n")
+
+		return indent.String(s, 1)
+	}
+
+	if m.hasBackstop {
+		s += hasBackstop
+	} else {
+		s += noBackstop
+	}
+
+	if m.hasDocker {
+		s += hasDocker
+	} else {
+		s += noDocker
+
+	}
+
+	if m.hasDocker && m.hasBackstop {
+		s = hasBackstop + hasDocker + "\n" + "✅ Dependency requirements met!"
+	}
+
+	s += ("\n\nPress any key to exit\n")
+
+	return indent.String(s, 1)
 }

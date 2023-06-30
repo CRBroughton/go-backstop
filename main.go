@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -57,24 +56,25 @@ func main() {
 }
 
 func New() MainModel {
+	var startingState sessionState
+
+	if !config.GetDependencyCheck() {
+		startingState = depChecker
+	} else {
+		startingState = mainMenu
+	}
+
 	return MainModel{
-		state:      mainMenu,
-		depChecker: depchecker.New(),
+		state:      startingState,
 		mainMenu:   mainmenu.New(),
+		depChecker: depchecker.New(),
 	}
 }
 
 func (m MainModel) Init() tea.Cmd {
-	_, err := exec.LookPath("docker")
-
-	if utils.IsError(err) {
-		fmt.Println("Could not find docker; Please install docker")
-		os.Exit(1)
-	}
-
 	config.CreateJSON()
 
-	_, err = os.Stat("backstop_data")
+	_, err := os.Stat("backstop_data")
 
 	if errors.Is(err, os.ErrNotExist) {
 		config.RunBackstopCommand("init", false)
@@ -99,6 +99,10 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.windowSize = msg // pass this along to the entry view so it uses the full window size when it's initialized
+	case depchecker.DependenciesInstalled:
+		m.state = mainMenu
+		m.mainMenu = mainmenu.New()
+		m.mainMenu, cmd = m.mainMenu.Update(m.windowSize)
 	case mainmenu.RunTestsSelected:
 		m.state = resultsTableMenu
 		m.resultsTableMenu = resultsTable.New()
