@@ -60,7 +60,6 @@ func New() MainModel {
 	return MainModel{
 		state:      depChecker,
 		depChecker: depchecker.New(),
-		mainMenu:   mainmenu.New(),
 	}
 }
 
