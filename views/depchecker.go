@@ -91,6 +91,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var cmd tea.Cmd
 		if m.hasBackstop && m.hasDocker {
 			return m, func() tea.Msg {
+				pause := time.Duration(time.Second)
+				time.Sleep(pause)
 				return DependenciesInstalled(true)
 			}
 		}
@@ -100,8 +102,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	s := "\n" +
-		m.Spinner.View() + " Checking dependencies, press ESC to quit...\n\n"
+	var spinnerMsg = m.Spinner.View() + " Checking dependencies, press ESC to quit...\n\n"
+	s := "\n" + spinnerMsg
+
+	// docker
+	var hasDocker = "\n" + m.result.emoji + "✅ Docker found!"
+	var noDocker = "\n" + "❌ Docker not found, searching..."
+
+	// backstop
+	var hasBackstop = "\n" + "✅ Backstop Installed!"
+	var noBackstop = "\n" + "❌ Backstop image not found"
 
 	if !m.hasDocker && len(m.result.emoji) > 0 {
 		s := "\n" + m.result.emoji + " Docker is not installed! :( \n\n"
@@ -111,20 +121,20 @@ func (m Model) View() string {
 	}
 
 	if m.hasBackstop {
-		s = s + "\n" + "✅ Backstop Installed!"
+		s += hasBackstop
 	} else {
-		s = s + "\n" + "❌ Backstop image not found"
+		s += noBackstop
 	}
 
 	if m.hasDocker {
-		s = s + "\n" + m.result.emoji + "✅ Docker found!"
+		s += hasDocker
 	} else {
-		s = s + "\n" + "❌ Docker not found, searching..."
+		s += noDocker
 
 	}
 
 	if m.hasDocker && m.hasBackstop {
-		s = s + "\n" + "✅ Dependency requirements met!"
+		s = hasBackstop + hasDocker + "\n" + "✅ Dependency requirements met!"
 	}
 
 	s += ("\n\nPress any key to exit\n")
