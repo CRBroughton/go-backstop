@@ -32,11 +32,11 @@ the `resultstable` object in your configuration file; These values must be numbe
 
 To do list:
 
-- Add more robust dependency checker
+- ~~Add more robust dependency checker~~
 - Creation of cookies - partially done
 - ~~Creation of custom scenarios~~
 - Improved TUI styling
-- Dynamic loading screens
+- Dynamic loading screens - partially done
 - ~~Visualise output of BackstopJS reporting into terminal~~
-- Better seperate concerns of each view
+- Better seperate concerns of each view - mostly done
 - ~~Handle failed tests (application currently `log.fatal`'s if it gets back a failed test)~~
