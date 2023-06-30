@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -64,16 +63,9 @@ func New() MainModel {
 }
 
 func (m MainModel) Init() tea.Cmd {
-	_, err := exec.LookPath("docker")
-
-	if utils.IsError(err) {
-		fmt.Println("Could not find docker; Please install docker")
-		os.Exit(1)
-	}
-
 	config.CreateJSON()
 
-	_, err = os.Stat("backstop_data")
+	_, err := os.Stat("backstop_data")
 
 	if errors.Is(err, os.ErrNotExist) {
 		config.RunBackstopCommand("init", false)
