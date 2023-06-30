@@ -44,7 +44,6 @@ func New() Model {
 }
 
 func (m Model) Init() tea.Cmd {
-
 	return tea.Batch(m.Spinner.Tick, m.checkDocker, docker.CheckForImage)
 }
 
@@ -93,6 +92,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, func() tea.Msg {
 				pause := time.Duration(time.Second)
 				time.Sleep(pause)
+				config.SetDependencyCheck()
 				return DependenciesInstalled(true)
 			}
 		}

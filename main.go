@@ -56,8 +56,17 @@ func main() {
 }
 
 func New() MainModel {
+	var startingState sessionState
+
+	if !config.GetDependencyCheck() {
+		startingState = depChecker
+	} else {
+		startingState = mainMenu
+	}
+
 	return MainModel{
-		state:      depChecker,
+		state:      startingState,
+		mainMenu:   mainmenu.New(),
 		depChecker: depchecker.New(),
 	}
 }
