@@ -72,7 +72,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, constants.Keymap.Enter):
 			item, ok := m.list.SelectedItem().(item)
 			if !ok {
-				log.Fatal("v ...any")
+				log.Fatal("Failed to select the menu item")
 			}
 			if ok {
 				m.setView(item.ID)

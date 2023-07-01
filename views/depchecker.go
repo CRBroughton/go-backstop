@@ -29,7 +29,6 @@ type result struct {
 type Model struct {
 	Spinner     spinner.Model
 	result      result
-	hasDeps     bool
 	hasBackstop bool
 	hasDocker   bool
 }
@@ -55,7 +54,6 @@ func (m *Model) checkDocker() tea.Msg {
 	if utils.IsError(err) {
 		m.hasDocker = false
 		return dockerNotInstalled(pause)
-
 	}
 
 	config.CreateJSON()
@@ -106,7 +104,7 @@ func (m Model) View() string {
 	s := "\n" + spinnerMsg
 
 	// docker
-	var hasDocker = "\n" + m.result.emoji + "✅ Docker found!"
+	var hasDocker = "\n" + "✅ Docker found!"
 	var noDocker = "\n" + "❌ Docker not found, searching..."
 
 	// backstop
