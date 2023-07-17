@@ -10,10 +10,10 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/crbroughton/go-backstop/config"
 	"github.com/crbroughton/go-backstop/constants"
 	"github.com/crbroughton/go-backstop/docker"
+	"github.com/crbroughton/go-backstop/styles"
 	"github.com/crbroughton/go-backstop/utils"
 	"github.com/muesli/reflow/indent"
 )
@@ -36,7 +36,7 @@ type Model struct {
 func New() Model {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
-	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	s.Style = styles.SpinnerStyle
 	return Model{
 		Spinner: s,
 	}

@@ -15,12 +15,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/crbroughton/go-backstop/config"
 	"github.com/crbroughton/go-backstop/constants"
+	"github.com/crbroughton/go-backstop/styles"
 	"github.com/crbroughton/go-backstop/utils"
 )
 
 var (
-	focusedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	blurredStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
+	focusedStyle = styles.MenuItemStyle
+	blurredStyle = styles.HighlightedMenuItemStyle
 	cursorStyle  = focusedStyle.Copy()
 	noStyle      = lipgloss.NewStyle()
 	helpStyle    = blurredStyle.Copy()
