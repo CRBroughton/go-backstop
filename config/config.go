@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -120,7 +119,7 @@ func WriteDefaultConfiguration() {
 
 func SetDependencyCheck() {
 	// Read JSON file
-	file, err := ioutil.ReadFile(settingsPath)
+	file, err := os.ReadFile(settingsPath)
 	if utils.IsError(err) {
 		fmt.Println("Error reading file:", err)
 	}
@@ -140,7 +139,7 @@ func SetDependencyCheck() {
 	}
 
 	// Write the updated JSON to a file
-	err = ioutil.WriteFile(settingsPath, updatedJSON, 0644)
+	err = os.WriteFile(settingsPath, updatedJSON, 0644)
 	if utils.IsError(err) {
 		fmt.Println("Error writing file:", err)
 		return
@@ -150,7 +149,7 @@ func SetDependencyCheck() {
 
 func GetDependencyCheck() bool {
 	// Read JSON file
-	file, err := ioutil.ReadFile(settingsPath)
+	file, err := os.ReadFile(settingsPath)
 	if utils.IsError(err) {
 		return false
 	}
@@ -166,7 +165,7 @@ func GetDependencyCheck() bool {
 
 func GetTableWidthHeight() (int, int) {
 	// Read JSON file
-	file, err := ioutil.ReadFile(settingsPath)
+	file, err := os.ReadFile(settingsPath)
 	if utils.IsError(err) {
 		fmt.Println("Error reading file:", err)
 		return 0, 0
@@ -187,7 +186,7 @@ func GetTableWidthHeight() (int, int) {
 // AppendToJSONArray appends a new struct to the configuration file
 func AppendToJSONArray(newItem interface{}, fieldName string) {
 	// Read JSON file
-	file, err := ioutil.ReadFile(settingsPath)
+	file, err := os.ReadFile(settingsPath)
 	if utils.IsError(err) {
 		fmt.Println("Error reading file:", err)
 		return
@@ -216,7 +215,7 @@ func AppendToJSONArray(newItem interface{}, fieldName string) {
 	}
 
 	// Write the updated JSON to a file
-	err = ioutil.WriteFile(settingsPath, updatedJSON, 0644)
+	err = os.WriteFile(settingsPath, updatedJSON, 0644)
 	if utils.IsError(err) {
 		fmt.Println("Error writing file:", err)
 		return
@@ -267,7 +266,7 @@ func GetTestResults() ([]table.Row, error) {
 	var obj map[string]interface{}
 
 	// Read JSON file
-	file, err := ioutil.ReadFile("backstop_data/json_report/jsonReport.json")
+	file, err := os.ReadFile("backstop_data/json_report/jsonReport.json")
 	if utils.IsError(err) {
 		fmt.Println("Error reading file:", err)
 		return nil, nil
