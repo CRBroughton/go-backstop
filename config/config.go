@@ -238,6 +238,7 @@ func RunBackstopCommand(command string, withConfig bool) {
 	args := []string{
 		"run",
 		"--rm",
+		"--network=host",
 		"-v",
 		workingDIR + ":/src",
 		"backstopjs/backstopjs",
