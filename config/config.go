@@ -36,6 +36,7 @@ type Config struct {
 	Cookies                 []Cookie                `json:"cookies"`
 	ResultsTable            ResultsTable            `json:"resultstable"`
 	PassedDependencyChecker passedDependencyChecker `json:"passedDependencyChecker"`
+	DockerHost              string                  `json:"dockerHost"`
 }
 
 type ResultsTable struct {
@@ -67,6 +68,7 @@ func defaultViewports() Config {
 		Scenarios:               []Scenario{},
 		Cookies:                 []Cookie{},
 		PassedDependencyChecker: false,
+		DockerHost:              "host",
 	}
 	return config
 }
@@ -222,6 +224,22 @@ func AppendToJSONArray(newItem interface{}, fieldName string) {
 	}
 }
 
+func getDockerHost() string {
+	// Read JSON file
+	file, err := os.ReadFile(settingsPath)
+	if utils.IsError(err) {
+		return ""
+	}
+
+	// Unmarshal JSON
+	var data Config
+	if err := json.Unmarshal(file, &data); err != nil {
+		fmt.Println("Error marshaling JSON:", err)
+	}
+
+	return string(data.DockerHost)
+}
+
 func RunBackstopCommand(command string, withConfig bool) {
 	workingDIR, err := os.Getwd()
 	if utils.IsError(err) {
@@ -237,7 +255,7 @@ func RunBackstopCommand(command string, withConfig bool) {
 	args := []string{
 		"run",
 		"--rm",
-		"--network=host",
+		"--network=" + getDockerHost(),
 		"-v",
 		workingDIR + ":/src",
 		"backstopjs/backstopjs",
