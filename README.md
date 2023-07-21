@@ -13,8 +13,6 @@ Go, Backstop! currently can:
 
 Go, Backstop! requires the following:
 
-- Node + NPM
-- Docker
 - The latest version of backstopJS docker image: ``docker pull backstopjs/backstopjs``
 
 
@@ -34,6 +32,7 @@ To do list:
 
 - ~~Add more robust dependency checker~~
 - Creation of cookies - partially done
+- Allow cookies to be used in tests
 - ~~Creation of custom scenarios~~
 - Improved TUI styling
 - Dynamic loading screens - partially done
