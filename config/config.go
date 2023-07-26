@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -345,4 +346,18 @@ func GetTestResults() ([]table.Row, error) {
 	}
 
 	return result, nil
+}
+
+func GetCookie(ref, name string) (*http.Cookie, error) {
+	res, err := http.Get(ref)
+	if utils.IsError(err) {
+		return nil, err
+	}
+	defer res.Body.Close()
+	for _, cook := range res.Cookies() {
+		if cook.Name == name {
+			return cook, nil
+		}
+	}
+	return nil, http.ErrNoCookie
 }
