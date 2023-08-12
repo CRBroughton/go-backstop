@@ -10,10 +10,10 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/crbroughton/go-backstop/config"
 	"github.com/crbroughton/go-backstop/constants"
 	"github.com/crbroughton/go-backstop/docker"
+	"github.com/crbroughton/go-backstop/styles"
 	"github.com/crbroughton/go-backstop/utils"
 	"github.com/muesli/reflow/indent"
 )
@@ -29,7 +29,6 @@ type result struct {
 type Model struct {
 	Spinner     spinner.Model
 	result      result
-	hasDeps     bool
 	hasBackstop bool
 	hasDocker   bool
 }
@@ -37,7 +36,7 @@ type Model struct {
 func New() Model {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
-	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	s.Style = styles.SpinnerStyle
 	return Model{
 		Spinner: s,
 	}
@@ -55,7 +54,6 @@ func (m *Model) checkDocker() tea.Msg {
 	if utils.IsError(err) {
 		m.hasDocker = false
 		return dockerNotInstalled(pause)
-
 	}
 
 	config.CreateJSON()
@@ -106,7 +104,7 @@ func (m Model) View() string {
 	s := "\n" + spinnerMsg
 
 	// docker
-	var hasDocker = "\n" + m.result.emoji + "✅ Docker found!"
+	var hasDocker = "\n" + "✅ Docker found!"
 	var noDocker = "\n" + "❌ Docker not found, searching..."
 
 	// backstop
